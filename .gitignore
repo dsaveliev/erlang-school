@@ -1,0 +1,6 @@
+*.beam
+.eunit
+deps
+logs
+ebin
+TAGS
