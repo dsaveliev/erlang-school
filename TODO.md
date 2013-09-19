@@ -22,7 +22,7 @@
     - Функции высшего порядка: map, filter, foldl
     - List Comprehensions
     - Binary, pattern matching with binary
-  - loop процесс, с обработкой сообщений
+  + loop процесс, с обработкой сообщений
   - наивный tcp сервер
   - http сервер и клиент
   - testing
