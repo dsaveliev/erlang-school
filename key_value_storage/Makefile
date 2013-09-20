@@ -20,10 +20,10 @@ background:
 	ERL_LIBS=deps:apps erl -detached $(ERL_RUN_ARGS)
 
 d:
-	dialyzer --src -I include 
+	dialyzer --src -I include src
 
 d_build:
-	dialyzer --build_plt --apps erts kernel stdlib
+	dialyzer --build_plt --apps erts kernel stdlib inets
 
 etag:
 	etag src/*
