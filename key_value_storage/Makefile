@@ -1,4 +1,4 @@
-ERL_RUN_ARGS:=-name project_db -pa ebin  -boot start_sasl -s kvs_app start
+ERL_RUN_ARGS:=-name kvs@localhost -pa ebin -config elog -boot start_sasl -s kvs_app start
 
 compile: 
 	rebar compile
