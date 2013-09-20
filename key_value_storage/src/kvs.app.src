@@ -4,8 +4,8 @@
   {description, "key value storage"},
   {vsn, "0.1.0"},
   {registered, []},
-  {applications, [kernel, stdlib]},
-  {mod, {db_app, []}},
+  {applications, [kernel, stdlib, inets]},
+  {mod, {kvs_app, []}},
   {env, [{port, 8090},
          {db_options, [{data_file, "priv/data"},
                        {flush_interval, 20000}]}

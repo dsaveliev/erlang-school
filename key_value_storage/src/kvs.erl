@@ -8,12 +8,11 @@
 
 -include("kvs_types.hrl").
 
--type(item() :: {name(), info()}).
--type(letter() :: {integer(), [item()]}).
+-type(item() :: {key(), value()}).
 
 -record(state, {
           data_file :: string(),
-          letters = [] :: [letter()]
+          items = [] :: [item()]
 	 }).
 
 
@@ -23,24 +22,24 @@ start_link(Options) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Options, []).
 
 
--spec(create(name(), info()) -> ok | {error, name_exists}).
-create(Name, Info) ->
-    gen_server:call(?MODULE, {create, Name, Info}).
+-spec(create(key(), value()) -> ok | {error, key_exists}).
+create(Key, Value) ->
+    gen_server:call(?MODULE, {create, Key, Value}).
 
 
--spec(read(name()) -> {ok, info()} | {error, no_name}).
-read(Name) ->
-    gen_server:call(?MODULE, {read, Name}).
+-spec(read(key()) -> {ok, value()} | {error, no_value}).
+read(Key) ->
+    gen_server:call(?MODULE, {read, Key}).
 
 
--spec(update(name(), info()) -> ok | {error, no_name}).
-update(Name, NewInfo) ->
-    gen_server:call(?MODULE, {update, Name, NewInfo}).
+-spec(update(key(), value()) -> ok | {error, no_value}).
+update(Key, NewValue) ->
+    gen_server:call(?MODULE, {update, Key, NewValue}).
 
 
--spec(delete(name()) -> ok | {error, no_name}).
-delete(Name) ->
-    gen_server:call(?MODULE, {delete, Name}).
+-spec(delete(key()) -> ok | {error, no_value}).
+delete(Key) ->
+    gen_server:call(?MODULE, {delete, Key}).
 
 
 -spec(clear() -> ok).
@@ -59,75 +58,50 @@ flush() ->
 %%% gen_server API
 
 init(Options) ->
-    io:format("db worker started with options: ~p~n", [Options]),
+    io:format("kvs started with options: ~p~n", [Options]),
     self() ! restore,
     FlushInterval = proplists:get_value(flush_file, Options, 10000),
     DataFile = proplists:get_value(data_file, Options, "priv/data_file"),
     timer:apply_interval(FlushInterval, gen_server, cast, [?MODULE, flush]),
     {ok, #state{data_file = DataFile}}.
 
-handle_call({create, Name, Info}, _From, #state{letters = Letters} = State) ->
-    [FLetter | _] = Name,
-    case proplists:get_value(FLetter, Letters) of
-        undefined -> NewLetter = {FLetter, [{Name, Info}]},
-                     NewLetters = [NewLetter | Letters],
-                     {reply, ok, State#state{letters = NewLetters}};
-        Items -> 
-            case proplists:get_value(Name, Items) of
-                undefined -> NewItems = [{Name, Info} | Items],
-                             NewLetters = [{FLetter, NewItems} | proplists:delete(FLetter, Letters)],
-                             {reply, ok, State#state{letters = NewLetters}};
-                _Info -> {reply, {error, name_exists}, State}
-            end
+handle_call({create, Key, Value}, _From, #state{items = Items} = State) ->
+    case proplists:get_value(Key, Items) of
+        undefined -> NewItems = [{Key, Value} | Items],
+                     {reply, ok, State#state{items = NewItems}};
+        _Value -> {reply, {error, key_exists}, State}
     end;
 
-handle_call({read, Name}, _From, #state{letters = Letters} = State) ->
-    [FLetter | _] = Name,
-    case proplists:get_value(FLetter, Letters) of
-        undefined -> {reply, {error, no_name}, State};
-        Items ->
-            case proplists:get_value(Name, Items) of
-                undefined -> {reply, {error, no_name}, State};
-                Info -> {reply, {ok, Info}, State}
-            end
+handle_call({read, Key}, _From, #state{items = Items} = State) ->
+    case proplists:get_value(Key, Items) of
+        undefined -> {reply, {error, no_value}, State};
+        Value -> {reply, {ok, Value}, State}
     end;
 
-handle_call({update, Name, NewInfo}, _From, #state{letters = Letters} = State) ->
-    [FLetter | _] = Name,
-    case proplists:get_value(FLetter, Letters) of
-        undefined -> {reply, {error, no_name}, State};
-        Items ->
-            case proplists:get_value(Name, Items) of
-                undefined -> {reply, {error, no_name}, State};
-                _ -> NewItems = [{Name, NewInfo} | proplists:delete(Name, Items)],
-                     NewLetters = [{FLetter, NewItems} | proplists:delete(FLetter, Letters)],
-                     {reply, ok, State#state{letters = NewLetters}}
-            end
+handle_call({update, Key, NewValue}, _From, #state{items = Items} = State) ->
+    case proplists:get_value(Key, Items) of
+        undefined -> {reply, {error, no_value}, State};
+        _ -> NewItems = [{Key, NewValue} | proplists:delete(Key, Items)],
+             {reply, ok, State#state{items = NewItems}}
     end;
 
-handle_call({delete, Name}, _From, #state{letters = Letters} = State) ->
-    [FLetter | _] = Name,
-    case proplists:get_value(FLetter, Letters) of
-        undefined -> {reply, {error, no_name}, State};
-        Items ->
-            case proplists:get_value(Name, Items) of
-                undefined -> {reply, {error, no_name}, State};
-                _ -> NewItems = proplists:delete(Name, Items),
-                     NewLetters = [{FLetter, NewItems} | proplists:delete(FLetter, Letters)],
-                     {reply, ok, State#state{letters = NewLetters}}
-            end
+handle_call({delete, Key}, _From, #state{items = Items} = State) ->
+    case proplists:get_value(Key, Items) of
+        undefined -> {reply, {error, no_value}, State};
+        _ -> NewItems = proplists:delete(Key, Items),
+             {reply, ok, State#state{items = NewItems}}
     end;
 
 handle_call(clear, _From, State) ->
-    {reply, ok, State#state{letters = []}};
+    {reply, ok, State#state{items = []}};
 
 handle_call(Any, _From, State) ->
     ?ERROR("unknown call ~p in ~p ~n", [Any, ?MODULE]),
     {noreply, State}.
 
 
-handle_cast(flush, #state{data_file = DataFile, letters = Letters} = State) ->
-    Data = term_to_binary(Letters),
+handle_cast(flush, #state{data_file = DataFile, items = Items} = State) ->
+    Data = term_to_binary(Items),
     file:write_file(DataFile, Data),
     {noreply, State};
 
@@ -138,8 +112,8 @@ handle_cast(Any, State) ->
 
 handle_info(restore, #state{data_file = DataFile} = State) ->
     case file:read_file(DataFile) of
-        {ok, Data} -> Letters = binary_to_term(Data),
-                      {noreply, State#state{letters = Letters}};
+        {ok, Data} -> Items = binary_to_term(Data),
+                      {noreply, State#state{items = Items}};
         _ -> {noreply, State}
     end;
 
