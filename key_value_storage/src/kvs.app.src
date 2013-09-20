@@ -1,0 +1,13 @@
+% -*- mode: Erlang;-*-
+{application, kvs,
+ [
+  {description, "key value storage"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {mod, {db_app, []}},
+  {env, [{port, 8090},
+         {db_options, [{data_file, "priv/data"},
+                       {flush_interval, 20000}]}
+         ]}
+  ]}.

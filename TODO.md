@@ -14,7 +14,10 @@
   - elogger
   - appmon, pman, tv, webtool
   - cprof, fprof
-
+  - dialyzer
+    - http://www.erlang.org/doc/apps/dialyzer/dialyzer_chapter.html
+    - http://www.erlang.org/doc/man/dialyzer.html
+    
 - весь код написать заранее
   - основы языка
     - Структуры данных: list, proplist, io_list, dict, ets
