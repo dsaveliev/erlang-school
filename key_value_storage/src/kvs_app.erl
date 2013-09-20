@@ -14,7 +14,7 @@ start() ->
 start(_StartType, _StartArgs) ->
     %% {ok, Port} = application:get_env(port),
     {ok, DbOptions} = application:get_env(db_options),
-    io:format("kvs_app started with options:~p~n", [DbOptions]),
+    io:format("~nkvs_app started with options:~p~n", [DbOptions]),
     kvs_sup:start_link(DbOptions).
 
 
