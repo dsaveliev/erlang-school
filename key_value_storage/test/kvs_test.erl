@@ -11,50 +11,53 @@ create_test() ->
     ?assertEqual(ok, kvs:create("Bill", "2233")),
     ?assertEqual(ok, kvs:create("Frank", "3344")),
     ?assertEqual(ok, kvs:create("Fish", "4455")),
-    ?assertEqual({error, key_exists}, kvs:create("Bill", "1")),
-    ?assertEqual({error, key_exists}, kvs:create("Bob", "2")),
-    ?assertEqual({error, key_exists}, kvs:create("Frank", "2")),
-    ?assertEqual({error, key_exists}, kvs:create("Fish", "2")),
+    ?assertEqual(ok, kvs:create("Bill", "1")),
+    ?assertEqual(ok, kvs:create("Bob", "2")),
+    ?assertEqual(ok, kvs:create("Frank", "2")),
+    ?assertEqual(ok, kvs:create("Fish", "2")),
     ?assertEqual(ok, kvs:create("Duck", "5566")),
-    ?assertEqual({error, key_exists}, kvs:create("Duck", "2")),
+    ?assertEqual(ok, kvs:create("Duck", "2")),
     kvs:clear().
 
 
 read_test() ->
     ?assertEqual({error, no_value}, kvs:read("Bob")),
     ?assertEqual(ok, kvs:create("Bob", "1122")),
-    ?assertEqual({ok, "1122"}, kvs:read("Bob")),
+    ?assertMatch({ok, [{_, "1122"}]}, kvs:read("Bob")),
+    ?assertEqual(ok, kvs:create("Bob", "2233")),
+    ?assertMatch({ok, [{_, "2233"}, {_, "1122"}]}, kvs:read("Bob")),
+
     ?assertEqual({error, no_value}, kvs:read("Bill")),
     ?assertEqual(ok, kvs:create("Bill", "2233")),
-    ?assertEqual({ok, "2233"}, kvs:read("Bill")),
+    ?assertMatch({ok, [{_, "2233"}]}, kvs:read("Bill")),
+
     ?assertEqual({error, no_value}, kvs:read("Frank")),
+    ?assertEqual(ok, kvs:create("Frank", "1122")),
+    ?assertEqual(ok, kvs:create("Frank", "2233")),
     ?assertEqual(ok, kvs:create("Frank", "3344")),
-    ?assertEqual({ok, "3344"}, kvs:read("Frank")),
-    ?assertEqual(ok, kvs:create("Duck", "4455")),
-    ?assertEqual({ok, "4455"}, kvs:read("Duck")),
-    ?assertEqual(ok, kvs:create("Fool", "5566")),
-    ?assertEqual({ok, "5566"}, kvs:read("Fool")),
+    ?assertEqual(ok, kvs:create("Frank", "4455")),
+    ?assertEqual(ok, kvs:create("Frank", "5566")),
+    ?assertMatch({ok, [{_, "5566"}, {_, "4455"}, {_, "3344"}]}, kvs:read("Frank")),
     kvs:clear().
 
 
 update_test() ->
     ?assertEqual({error, no_value}, kvs:update("Bob", "4455")),
     ?assertEqual(ok, kvs:create("Bob", "1122")),
-    ?assertEqual(ok, kvs:create("Bill", "2233")),
-    ?assertEqual({ok, "1122"}, kvs:read("Bob")),
+    ?assertEqual(ok, kvs:create("Bob", "2233")),
+    ?assertMatch({ok, [{_, "2233"}, {_, "1122"}]}, kvs:read("Bob")),
     ?assertEqual(ok, kvs:update("Bob", "4455")),
-    ?assertEqual(ok, kvs:update("Bill", "7788")),
-    ?assertEqual({ok, "4455"}, kvs:read("Bob")),
-    ?assertEqual({ok, "7788"}, kvs:read("Bill")),
-    ?assertEqual(ok, kvs:create("Frank", "aa1122")),
-    ?assertEqual({ok, "aa1122"}, kvs:read("Frank")),
-    ?assertEqual(ok, kvs:update("Frank", "aa4455")),
-    ?assertEqual({ok, "aa4455"}, kvs:read("Frank")),
-    ?assertEqual({error, no_value}, kvs:update("Fish", "3333")),
-    ?assertEqual(ok, kvs:create("Fish", "1111")),
-    ?assertEqual({ok, "1111"}, kvs:read("Fish")),
-    ?assertEqual(ok, kvs:update("Fish", "3333")),
-    ?assertEqual({ok, "3333"}, kvs:read("Fish")),
+    ?assertMatch({ok, [{_, "4455"}, {_, "1122"}]}, kvs:read("Bob")),
+
+    ?assertEqual({error, no_value}, kvs:update("Bill", "0000")),
+    ?assertEqual(ok, kvs:create("Bill", "1111")),
+    ?assertEqual(ok, kvs:create("Bill", "2222")),
+    ?assertMatch({ok, [{_, "2222"}, {_, "1111"}]}, kvs:read("Bill")),
+    ?assertEqual(ok, kvs:update("Bill", "3333")),
+    ?assertMatch({ok, [{_, "3333"}, {_, "1111"}]}, kvs:read("Bill")),
+
+    ?assertEqual(ok, kvs:update("Bob", "1111")),
+    ?assertMatch({ok, [{_, "1111"}, {_, "1122"}]}, kvs:read("Bob")),
     kvs:clear().
 
 
