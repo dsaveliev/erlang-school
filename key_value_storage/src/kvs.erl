@@ -8,7 +8,8 @@
 
 -include("kvs_types.hrl").
 
--type(item() :: {key(), value()}).
+-type(value_set() :: [{calendar:datetime(), value()}]).
+-type(item() :: {key(), value_set()}).
 
 -record(state, {
           data_file :: string(),
@@ -22,12 +23,12 @@ start_link(Options) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, Options, []).
 
 
--spec(create(key(), value()) -> ok | {error, key_exists}).
+-spec(create(key(), value()) -> ok).
 create(Key, Value) ->
     gen_server:call(?MODULE, {create, Key, Value}).
 
 
--spec(read(key()) -> {ok, value()} | {error, no_value}).
+-spec(read(key()) -> {ok, value_set()} | {error, no_value}).
 read(Key) ->
     gen_server:call(?MODULE, {read, Key}).
 
@@ -66,23 +67,29 @@ init(Options) ->
     {ok, #state{data_file = DataFile}}.
 
 handle_call({create, Key, Value}, _From, #state{items = Items} = State) ->
-    case proplists:get_value(Key, Items) of
-        undefined -> NewItems = [{Key, Value} | Items],
-                     {reply, ok, State#state{items = NewItems}};
-        _Value -> {reply, {error, key_exists}, State}
-    end;
+    Now = {date(), time()},
+    NewItems = case proplists:get_value(Key, Items) of
+                   undefined -> ValueSet = [{Now, Value}],
+                                [{Key, ValueSet} | Items];
+                   ValueSet -> ValueSet2 = add_value_to_set(Now, Value, ValueSet),
+                               replace_item({Key, ValueSet2}, {Key, ValueSet}, Items)
+               end,
+    {reply, ok, State#state{items = NewItems}};
 
 handle_call({read, Key}, _From, #state{items = Items} = State) ->
     case proplists:get_value(Key, Items) of
         undefined -> {reply, {error, no_value}, State};
-        Value -> {reply, {ok, Value}, State}
+        ValueSet -> {reply, {ok, ValueSet}, State}
     end;
 
 handle_call({update, Key, NewValue}, _From, #state{items = Items} = State) ->
+    Now = {date(), time()},
     case proplists:get_value(Key, Items) of
         undefined -> {reply, {error, no_value}, State};
-        _ -> NewItems = [{Key, NewValue} | proplists:delete(Key, Items)],
-             {reply, ok, State#state{items = NewItems}}
+        ValueSet -> [_ | Rest] = ValueSet,
+                    ValueSet2 = [{Now, NewValue} | Rest],
+                    NewItems = replace_item({Key, ValueSet2}, {Key, ValueSet}, Items),
+                    {reply, ok, State#state{items = NewItems}}
     end;
 
 handle_call({delete, Key}, _From, #state{items = Items} = State) ->
@@ -129,3 +136,18 @@ terminate(_Reason, _State) ->
 code_change(_OldVersion, State, _Extra) ->
     {ok, State}.	
 
+
+%% inner functions
+
+-spec(add_value_to_set(calendar:datetime(), value(), value_set()) -> value_set()).
+add_value_to_set(Time, Value, ValueSet) ->
+    TimeVal = {Time, Value},
+    case ValueSet of
+        [Val1, Val2 | _] -> [TimeVal, Val1, Val2];
+        _ -> [TimeVal | ValueSet]
+    end.
+
+
+-spec(replace_item(item(), item(), [item()]) -> [item()]).
+replace_item(NewItem, OldItem, Items) ->
+    [NewItem | lists:delete(OldItem, Items)].
