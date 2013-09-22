@@ -12,6 +12,7 @@ KVS
   
 - повторить темы:
   - Структуры данных: list, proplist, io_list, dict, ets
+    http://learnyousomeerlang.com/a-short-visit-to-common-data-structures
   - List Comprehensions
   - Binary, pattern matching with binary
   - supervisor
@@ -33,8 +34,8 @@ KVS
     - List Comprehensions
     - Binary, pattern matching with binary
   + loop процесс, с обработкой сообщений
-  - наивный tcp сервер
-  - http сервер и клиент
+  + наивный tcp сервер
+  - http сервер и клиент (with cowboy)
   - testing
     - eunit
     - Тестирование gen_server
