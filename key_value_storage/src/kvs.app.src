@@ -6,7 +6,8 @@
   {registered, []},
   {applications, [kernel, stdlib, inets]},
   {mod, {kvs_app, []}},
-  {env, [{port, 8080},
+  {env, [{tcp_port, 8080},
+         {http_port, 8888},
          {num_acceptors, 10},
          {db_options, [{data_file, "priv/data"},
                        {flush_interval, 20000}]}
