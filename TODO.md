@@ -1,40 +1,80 @@
-- мне нужно научиться работать с Erlang под виндой
-
-- изучить разные способы запуска сервера
-  (в рассылке было)
-  
-- повторить темы:
-  - Структуры данных: list, proplist, io_list, dict, ets
-    http://learnyousomeerlang.com/a-short-visit-to-common-data-structures
-  - List Comprehensions
-  - Binary, pattern matching with binary
-  - supervisor
-  - eunit
-
-- попробовать тулы:
-  - elogger
-  - appmon, pman, tv, webtool
-  - cprof, fprof
-  - dialyzer
-    - http://www.erlang.org/doc/apps/dialyzer/dialyzer_chapter.html
-    - http://www.erlang.org/doc/man/dialyzer.html
-    
 - весь код написать заранее
-  - основы языка
-    - Структуры данных: list, proplist, io_list, dict, ets
-    - Обработка списков с помощью рекурсивных функций с аккумуляторами
-    - Функции высшего порядка: map, filter, foldl
-    - List Comprehensions
-    - Binary, pattern matching with binary
-  + loop процесс, с обработкой сообщений
-  + наивный tcp сервер
   - http сервер и клиент (with cowboy)
   - testing
     - eunit
     - Тестирование gen_server
     - Тестирование базы данных
     - Тестирование клиентом
-  + key-value хранилище
 
-инета не будет, поэтому нужно взять с собой инсталяторы Erlang под linux/win/mac
-и все зависимости. И убедиться, что весь код собирается под linux/win/mac без инета
+- мне нужно научиться работать с Erlang под виндой
+
+- инета не будет, поэтому нужно взять с собой инсталяторы Erlang под linux/win/mac
+  и все зависимости. И убедиться, что весь код собирается под linux/win/mac без инета
+
+- Развертывание и запуск сервера
+- Подключение к серверу через удаленную консоль, мониторинг
+- Стресс-тестирование
+- профилирование, выявление узких мест
+
+- попробовать тулы:
+  - elogger
+  - appmon, pman, tv, webtool
+  - cprof, fprof
+
+============
+
+- конспект по всем темам курса
+
+### Основы Erlang (2 часа)
+function, close, module, анонимные функции
+Структуры данных: list, proplist, io_list, dict, ets
+Обработка списков с помощью рекурсивных функций с аккумуляторами
+Функции высшего порядка: map, filter, foldl
+List Comprehensions
+Binary, pattern matching with binary
+
+### Concurrency (1 час)
+Concurrency and parallelism
+Многопоточность в Erlang
+Жизнь erlang-процесса (бесконечная рекурсия, состояние на стеке)
+Работа с потоками на низком уровне
+spawn, receive, register
+link, spawn_link, monitor, exit, trap exit
+
+### OTP (2 часа)
+gen_server
+supervisor
+Обработка ошибок
+Defensive Programming vs Let it crash
+application
+Типичная структура OTP проекта с дочерними приложениями и зависимыми библиотеками
+
+### Работа с сокетами, практика (1 час)
+TCP, UDP
+Активный и пассивный режим сокета
+Наивный tcp сервер
+http сервер и клиент
+
+### Инструменты (2 часа)
+rebar
+управление зависимостями
+сборка проекта
+Логирование
+report browser
+elogger
+appmon, pman, tv, webtool
+dialyzer
+
+### Тестирование, практика (2 часа)
+eunit
+Тестирование gen_server
+Тестирование базы данных
+Тестирование клиентом
+
+### Библиотеки (2 часа)
+ranch acceptor pool
+Веб сервера: yaws, cowboy
+Сериализация данных: JSON (jsonx), bert, google protocol buffers
+poolboy
+epgsql
+
