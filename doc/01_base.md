@@ -131,6 +131,17 @@ X = 10
 происходит матчинг значения 10 в неопределенную переменную X.
 
 
+выше определен UserId
+%% check table owner leave table in waiting state
+case personal_table:get_table_for_room(RoomId) of
+    {ok, #ptable{id = TableId, owner = UserId}} ->
+        bingo_room_manager:close_table_and_room(TableId, RoomId);
+    _ -> do_nothing
+end;
+Находим стол, и сразу матчингом UserId проверяем владельца
+ну разве не прелесть?
+
+
 ### case, if, guards
 
 case find_user(UserId) of
