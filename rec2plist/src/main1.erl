@@ -28,6 +28,7 @@ rec2plist(Item) ->
     lists:zip(Fields, Values).
 
 
+-spec(plist2rec(atom(), list()) -> tuple()).
 plist2rec(RecordName, Props) ->
     Fields = get_fields(RecordName),
     Values = lists:map(fun(Field) ->
