@@ -1,4 +1,4 @@
--module(main1).
+-module(step_3).
 
 -export([rec2plist/1, test/0]).
 -include_lib("eunit/include/eunit.hrl").
@@ -11,29 +11,40 @@
 
 
 -record(comment, {id = 0 :: integer(),
-                  user_id = 0 :: integer(),
+                  user :: #user{},
                   text = <<>> :: binary()}).
 
 
 get_fields(user) -> record_info(fields, user);
-get_fields(comment) -> record_info(fields, comment).
+get_fields(comment) -> record_info(fields, comment);
+get_fields(_) -> unknown_record.
      
 
 -spec(rec2plist(tuple()) -> list()).
 rec2plist(Item) ->
     [RecordName | Values] = tuple_to_list(Item),
-    Fields = lists:map(fun(Field) ->
-                               list_to_binary(atom_to_list(Field))
-                       end, get_fields(RecordName)),
-    lists:zip(Fields, Values).
+    case get_fields(RecordName) of
+        unknown_record -> Item;
+        Fields when length(Fields) =:= length(Values) ->
+            lists:map(fun({Field, Value}) ->
+                              BinField = list_to_binary(atom_to_list(Field)),
+                              case is_tuple(Value) of
+                                  true -> {BinField, rec2plist(Value)};
+                                  false ->{BinField, Value}
+                              end
+                      end, lists:zip(Fields, Values))
+    end.
 
 
--spec(plist2rec(atom(), list()) -> tuple()).
 plist2rec(RecordName, Props) ->
     Fields = get_fields(RecordName),
     Values = lists:map(fun(Field) ->
                                BinField = list_to_binary(atom_to_list(Field)),
-                               proplists:get_value(BinField, Props)
+                               Val = proplists:get_value(BinField, Props),
+                               case get_fields(Field) of
+                                   unknown_record -> Val;
+                                   _ -> plist2rec(Field, Val)
+                               end
                        end, Fields),
     list_to_tuple([RecordName | Values]).
     
@@ -49,13 +60,13 @@ test() ->
     ?assertEqual(P2, rec2plist(U2)),
     ?assertEqual(U2, plist2rec(user, P2)),
     
-    C1 = #comment{id = 7, user_id = 5, text = <<"hello">>},
-    P3 = [{<<"id">>, 7}, {<<"user_id">>, 5}, {<<"text">>, <<"hello">>}],
+    C1 = #comment{id = 7, user = U1, text = <<"hello">>},
+    P3 = [{<<"id">>, 7}, {<<"user">>, P1}, {<<"text">>, <<"hello">>}],
     ?assertEqual(P3, rec2plist(C1)),
     ?assertEqual(C1, plist2rec(comment, P3)),
     
-    C2 = #comment{},
-    P4 = [{<<"id">>, 0}, {<<"user_id">>, 0}, {<<"text">>, <<>>}],
+    C2 = #comment{user = U2},
+    P4 = [{<<"id">>, 0}, {<<"user">>, P2}, {<<"text">>, <<>>}],
     ?assertEqual(P4, rec2plist(C2)),
     ?assertEqual(C2, plist2rec(comment, P4)),
     

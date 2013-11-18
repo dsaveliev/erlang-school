@@ -1,4 +1,4 @@
--module(main3).
+-module(step_4).
 
 -export([rec2plist/1, test/0]).
 -include_lib("eunit/include/eunit.hrl").
