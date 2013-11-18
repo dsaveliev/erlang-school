@@ -23,19 +23,17 @@ get_fields(_) -> unknown_record.
 -spec(rec2plist(tuple()) -> list()).
 rec2plist(Item) ->
     [RecordName | Values] = tuple_to_list(Item),
-    case get_fields(RecordName) of
-        unknown_record -> Item;
-        Fields when length(Fields) =:= length(Values) ->
-            lists:map(fun({Field, Value}) ->
-                              BinField = list_to_binary(atom_to_list(Field)),
-                              case is_tuple(Value) of
-                                  true -> {BinField, rec2plist(Value)};
-                                  false ->{BinField, Value}
-                              end
-                      end, lists:zip(Fields, Values))
-    end.
+    Fields = get_fields(RecordName),
+    lists:map(fun({Field, Value}) ->
+                      BinField = list_to_binary(atom_to_list(Field)),
+                      case is_tuple(Value) of
+                          true -> {BinField, rec2plist(Value)};
+                          false ->{BinField, Value}
+                      end
+              end, lists:zip(Fields, Values)).
 
 
+-spec(plist2rec(atom(), list()) -> tuple()).
 plist2rec(RecordName, Props) ->
     Fields = get_fields(RecordName),
     Values = lists:map(fun(Field) ->
