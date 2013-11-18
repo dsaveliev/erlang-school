@@ -29,6 +29,7 @@ rec2plist(#comment{id = Id, user_id = UserId, text = Text}) ->
 
 
 
+-spec(plist2rec(atom(), list()) -> tuple()).
 plist2rec(user, Props) ->
     #user{id = proplists:get_value(<<"id">>, Props),
           name = proplists:get_value(<<"name">>, Props),
