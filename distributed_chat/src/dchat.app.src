@@ -1,0 +1,11 @@
+% -*- mode: Erlang;-*-
+{application, dchat,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {mod, {dchat_app, []}},
+  {env, [
+	]}
+ ]}.
