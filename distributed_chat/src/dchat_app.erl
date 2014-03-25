@@ -8,6 +8,7 @@
 start() ->
     ok = application:start(crypto),
     ok = application:start(ranch),
+    ok = application:start(cowlib),
     ok = application:start(cowboy),
     ok = application:start(dchat),
     ok.
@@ -29,16 +30,10 @@ stop(_State) ->
 
 
 routes()->
-    [{'_', static_routes() ++
-          [
-           %% {"/api/catalog/", catalog_handler, []},
-           {'_', not_found_handler, []}
-          ]}].
-
-
-static_routes() ->
-    PrivDir = "priv/static/",
-    Mimetypes = {mimetypes, {fun mimetypes:path_to_mimes/2, default}},
-    [{"/css/[...]", cowboy_static, [{directory, PrivDir ++ "css"}, Mimetypes]},
-     {"/js/[...]",  cowboy_static, [{directory, PrivDir ++ "js"}, Mimetypes]},
-     {"/img/[...]", cowboy_static, [{directory, PrivDir ++ "img"}, Mimetypes]}].
+    [{'_',
+      [
+       %% {"/api/catalog/", catalog_handler, []},
+       {"/", cowboy_static, {file, "priv/static/index.html", [{mimetypes, cow_mimetypes, all}]}},
+       {"/[...]", cowboy_static, {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
+       {'_', not_found_handler, []}
+      ]}].
