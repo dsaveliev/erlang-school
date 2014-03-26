@@ -6,19 +6,27 @@
 -include("common.hrl").
 -include("logger.hrl").
 
+-record(state, {
+          name :: binary()
+         }).
 
 init(_Transport, Req, _Opts, _Active) ->
     ?INFO("chat_handler init"),
-	{ok, Req, no_state}.
+	{ok, Req, #state{}}.
 
 
 stream(<<"join/", Name/binary>>, Req, State) ->
     ?INFO("join ~p", [Name]),
     Reply = io_lib:format("joined/~p", [node()]),
+	{reply, Reply, Req, State#state{name = Name}};
+
+stream(<<"msg/", Msg/binary>>, Req, #state{name = Name} = State) ->
+    ?INFO("msg ~p", [Msg]),
+    Reply = io_lib:format("msg/~s/~s", [Name, Msg]),
 	{reply, Reply, Req, State};
 
 stream(Data, Req, State) ->
-	?INFO("chat received ~p~n", [Data]),
+	?INFO("chat receive ~p~n", [Data]),
 	{ok, Req, State}.
 
 

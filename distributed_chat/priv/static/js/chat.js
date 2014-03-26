@@ -1,7 +1,7 @@
 var chat = null;
 
 function connect() {
-    var name = $("#input_name")[0].value;
+    var name = $("#user_name")[0].value;
     if(name == "") return;
 
     console.log("connect");
@@ -28,6 +28,13 @@ function connect() {
         if(action == "joined") {
 		    $("#connection_info").text("Connected to " + data);
         }
+        if(action == "msg") {
+            var user = tokens[1];
+            var msg = tokens[2];
+            var output = $("#chat_output").html();
+            output += "<p><b>" + user + ":</b> " + msg + "</p>";
+            $("#chat_output").html(output);
+        }
 	};
 }
 
@@ -35,8 +42,17 @@ function disconnect() {
 	chat.close();
 }
 
+function send() {
+    var msg = $("#chat_input")[0].value;
+    if(msg == "") return;
+    chat.send("msg/" + msg);
+    $("#chat_input")[0].value = "";
+}
+
 $(document).ready(function(){
-    $("#enter_btn").on("click", connect);
-    $("#leave_btn").on("click", disconnect);
-    //$("#input_name").on("submit", connect);
+    $("#btn_enter").on("click", connect);
+    $("#btn_leave").on("click", disconnect);
+    $("#btn_send").on("click", send);
+    //$("#user_name").on("submit", connect);
+    //$("#chat_input").on("submit", send);
 });
