@@ -9,27 +9,23 @@
 
 init(_Transport, Req, _Opts, _Active) ->
     ?INFO("chat_handler init"),
-	TRef = erlang:send_after(5000, self(), refresh),
-	{ok, Req, TRef}.
+	{ok, Req, no_state}.
 
+
+stream(<<"join">>, Req, State) ->
+    Reply = io_lib:format("joined/~p", [node()]),
+	{reply, Reply, Req, State};
 
 stream(Data, Req, State) ->
 	?INFO("chat received ~p~n", [Data]),
 	{ok, Req, State}.
 
 
-info(refresh, Req, _State) ->
-	TRef = erlang:send_after(5000, self(), refresh),
-	DateTime = cowboy_clock:rfc1123(),
-	?INFO("chat refresh: ~p~n", [DateTime]),
-	{reply, DateTime, Req, TRef};
-
 info(Info, Req, State) ->
 	?INFO("info received ~p~n", [Info]),
 	{ok, Req, State}.
 
 
-terminate(_Req, TRef) ->
+terminate(_Req, _State) ->
 	?INFO("chat terminate"),
-	erlang:cancel_timer(TRef),
 	ok.

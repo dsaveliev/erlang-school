@@ -5,19 +5,20 @@
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
     <script src="/js/jquery-2.1.0.min.js"></script>
     <script src="/js/bullet.js"></script>
-    <!-- <script src="/js/chat.js"></script> -->
+    <script src="/js/chat.js"></script>
   </head>
-  <body style="margin:40px;">
+  <body style="margin-left:40px;">
 
     <h1>Distributed Chat</h1>
 
     <div id="login_screen" style="width:320px; padding:10px; background-color:orange;">
       <p>Enter with name:</p>
       <input id="input_name" style="width:200px;"/>
-      <input type="button" value="Enter" style="width:95px;"/>
+      <input id="enter_btn" type="button" value="Enter" style="width:95px;"/>
     </div>
 
     <div id="chat_screen" style="display:none;">
+      <div id="connection_info">No Connection</div>
       <table>
         <tr style="background-color:orange;">
           <th>Chat</th>
@@ -25,11 +26,11 @@
         </tr>
         <tr valign="top">
           <td>
-            <div id="chat_output" style="border:1px solid #000; width:400px; height:300px; overflow:scroll;">
+            <div id="chat_output" style="border:1px solid #000; width:400px; height:200px; overflow:scroll;">
             </div>
           </td>
           <td>
-            <div id="user_list" style="border:1px solid #000; width:200px; height:300px; overflow:scroll;">
+            <div id="user_list" style="border:1px solid #000; width:200px; height:200px; overflow:scroll;">
             </div>
           </td>
         </tr>
@@ -42,7 +43,6 @@
           </td>
         </tr>
       </table>
-      <div id="node_name">No Connection</div>
     </div>
 
   </body>
