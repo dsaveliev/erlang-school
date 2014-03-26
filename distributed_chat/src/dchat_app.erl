@@ -11,14 +11,17 @@ start() ->
     ok = application:start(cowlib),
     ok = application:start(cowboy),
     ok = application:start(dchat),
+    ?INFO("dchat app started"),
     ok.
 
 
 start(_StartType, _StartArgs) ->
+    Port = 8080,
     Routes = cowboy_router:compile(routes()),
     cowboy:start_http(http, 100,
-                      [{port, 8080}],
+                      [{port, Port}],
                       [{env, [{dispatch, Routes}]}]),
+    ?INFO("cowboy started at port ~p", [Port]),
     dchat_sup:start_link().
 
 
@@ -32,7 +35,7 @@ stop(_State) ->
 routes()->
     [{'_',
       [
-       %% {"/api/catalog/", catalog_handler, []},
+       {"/api/chat/", bullet_handler, [{handler, chat_handler}]},
        {"/", cowboy_static, {file, "priv/static/index.html", [{mimetypes, cow_mimetypes, all}]}},
        {"/[...]", cowboy_static, {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
        {'_', not_found_handler, []}
