@@ -35,11 +35,25 @@ function connect() {
             output += "<p><b>" + user + ":</b> " + msg + "</p>";
             $("#chat_output").html(output);
         }
+        if(action == "user_join") {
+            var user = tokens[1];
+            // TODO update and render user list
+            var output = "<p><b>" + user + "</b></p>";
+            $("#user_list").html(output);
+        }
+        if(action == "user_leave") {
+            var user = tokens[1];
+            // TODO update and render user list
+            var output = "";
+            $("#user_list").html(output);
+        }
 	};
 }
 
 function disconnect() {
 	chat.close();
+    $("#chat_output").html("");
+    $("#user_list").html("");
 }
 
 function send() {
