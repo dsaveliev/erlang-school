@@ -24,28 +24,33 @@ function connect() {
         console.log("onmessage", e.data);
         var tokens = e.data.split("/");
         var action = tokens[0];
-        var data = tokens[1];
-        if(action == "joined") {
-		    $("#connection_info").text("Connected to " + data);
-        }
-        if(action == "msg") {
+
+        switch(action) {
+        case "joined":
+            var node = tokens[1];
+		    $("#connection_info").text("Connected to " + node);
+            break;
+        case "msg":
             var user = tokens[1];
             var msg = tokens[2];
             var output = $("#chat_output").html();
             output += "<p><b>" + user + ":</b> " + msg + "</p>";
             $("#chat_output").html(output);
-        }
-        if(action == "user_join") {
+            break;
+        case "user_join":
             var user = tokens[1];
             // TODO update and render user list
             var output = "<p><b>" + user + "</b></p>";
             $("#user_list").html(output);
-        }
-        if(action == "user_leave") {
+            break;
+        case "user_leave":
             var user = tokens[1];
             // TODO update and render user list
             var output = "";
             $("#user_list").html(output);
+            break;
+        default:
+            console.log("unknown action", action);
         }
 	};
 }
