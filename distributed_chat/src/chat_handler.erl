@@ -12,7 +12,8 @@ init(_Transport, Req, _Opts, _Active) ->
 	{ok, Req, no_state}.
 
 
-stream(<<"join">>, Req, State) ->
+stream(<<"join/", Name/binary>>, Req, State) ->
+    ?INFO("join ~p", [Name]),
     Reply = io_lib:format("joined/~p", [node()]),
 	{reply, Reply, Req, State};
 
