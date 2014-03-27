@@ -1,7 +1,9 @@
 var chat = null;
+var history = [];
+var users = [];
 
 function connect() {
-    var name = $("#user_name")[0].value;
+    var name = $("#user_name").val();
     if(name == "") return;
 
     console.log("connect");
@@ -10,14 +12,15 @@ function connect() {
 	chat.onopen = function(){
         console.log("onopen");
         chat.send("join/" + name);
-        $("#login_screen")[0].style.display = "none";
-        $("#chat_screen")[0].style.display = "block";
+        $("#login_screen").css("display", "none");
+        $("#chat_screen").css("display", "block");
+        $("#chat_input").focus();
 	};
 
 	chat.onclose = chat.onDisconnect = function(){
         console.log("onclose");
-        $("#login_screen")[0].style.display = "block";
-        $("#chat_screen")[0].style.display = "none";
+        $("#login_screen").css("display", "block");
+        $("#chat_screen").css("display", "none");
 	};
 
 	chat.onmessage = function(e){
@@ -33,21 +36,19 @@ function connect() {
         case "msg":
             var user = tokens[1];
             var msg = tokens[2];
-            var output = $("#chat_output").html();
-            output += "<p><b>" + user + ":</b> " + msg + "</p>";
-            $("#chat_output").html(output);
+            history.push("<p><b>" + user + ":</b> " + msg + "</p>");
+            $("#chat_output").html(history.join("\n"));
+            $("#chat_output").scrollTop(history.length * 30);
             break;
         case "user_join":
             var user = tokens[1];
-            // TODO update and render user list
-            var output = "<p><b>" + user + "</b></p>";
-            $("#user_list").html(output);
+            users.push(user);
+            renderUsers();
             break;
         case "user_leave":
             var user = tokens[1];
-            // TODO update and render user list
-            var output = "";
-            $("#user_list").html(output);
+            removeUser(user);
+            renderUsers();
             break;
         default:
             console.log("unknown action", action);
@@ -57,21 +58,45 @@ function connect() {
 
 function disconnect() {
 	chat.close();
+    history = [];
+    users = [];
     $("#chat_output").html("");
     $("#user_list").html("");
+    $("#user_name").focus();
 }
 
 function send() {
-    var msg = $("#chat_input")[0].value;
+    var msg = $("#chat_input").val();
     if(msg == "") return;
     chat.send("msg/" + msg);
-    $("#chat_input")[0].value = "";
+    $("#chat_input").val("");
+    $("#chat_input").focus();
+}
+
+function removeUser(user) {
+    for(var i = 0; i < users.length; i++) {
+        if(users[i] == user) {
+            users.splice(i, 1);
+            break;
+        }
+    }
+}
+
+function renderUsers() {
+    var output = "<p><b>" + users.join("</b></p><p><b>") + "</b></p>";
+    console.log("render users", users, output);
+    $("#user_list").html(output);
 }
 
 $(document).ready(function(){
     $("#btn_enter").on("click", connect);
     $("#btn_leave").on("click", disconnect);
     $("#btn_send").on("click", send);
-    //$("#user_name").on("submit", connect);
-    //$("#chat_input").on("submit", send);
+    $("#user_name").on("keypress", function(event) {
+        if(event.keyCode == 13) connect();
+    });
+    $("#chat_input").on("keypress", function(event) {
+        if(event.keyCode == 13) send();
+    });
+    $("#user_name").focus();
 });
