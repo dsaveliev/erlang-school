@@ -31,23 +31,32 @@ function connect() {
         switch(action) {
         case "joined":
             var node = tokens[1];
-            var online = tokens[2];
-            console.log("online", online);
-            var messages = tokens[3];
-            console.log("messages", messages);
 		    $("#connection_info").text("Connected to " + node);
+
+            var online = tokens[2];
+            users = online.split("|");
+            renderUsers();
+
+            var messages = tokens[3].split("|");
+            history = [];
+            for(var i in messages) {
+                var parts = messages[i].split(":");
+                history.push("<p><b>" + parts[0] + ":</b> " + parts[1] + "</p>");
+            }
+            renderHistory();
             break;
         case "msg":
             var user = tokens[1];
             var msg = tokens[2];
             history.push("<p><b>" + user + ":</b> " + msg + "</p>");
-            $("#chat_output").html(history.join("\n"));
-            $("#chat_output").scrollTop(history.length * 30);
+            renderHistory();
             break;
         case "user_join":
             var user = tokens[1];
-            users.push(user);
-            renderUsers();
+            if(!userExists(user)) {
+                users.push(user);
+                renderUsers();
+            }
             break;
         case "user_leave":
             var user = tokens[1];
@@ -78,12 +87,24 @@ function send() {
 }
 
 function removeUser(user) {
-    for(var i = 0; i < users.length; i++) {
+    for(var i in users) {
         if(users[i] == user) {
             users.splice(i, 1);
             break;
         }
     }
+}
+
+function userExists(user) {
+    for(var i in users) {
+        if(users[i] == user) return true;
+    }
+    return false;
+}
+
+function renderHistory() {
+    $("#chat_output").html(history.join("\n"));
+    $("#chat_output").scrollTop(history.length * 30);
 }
 
 function renderUsers() {
