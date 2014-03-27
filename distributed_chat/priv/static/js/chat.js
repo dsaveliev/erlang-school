@@ -84,7 +84,6 @@ function removeUser(user) {
 
 function renderUsers() {
     var output = "<p><b>" + users.join("</b></p><p><b>") + "</b></p>";
-    console.log("render users", users, output);
     $("#user_list").html(output);
 }
 

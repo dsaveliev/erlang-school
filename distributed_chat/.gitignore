@@ -1,7 +1,7 @@
 *.beam
 .eunit
 deps
-logs
+log
 ebin
 TAGS
 erl_crash.dump

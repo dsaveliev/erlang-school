@@ -6,6 +6,7 @@
 -include("logger.hrl").
 
 start() ->
+    lager:start(),
     ok = application:start(crypto),
     ok = application:start(ranch),
     ok = application:start(cowlib),
@@ -16,7 +17,7 @@ start() ->
 
 
 start(_StartType, _StartArgs) ->
-    Port = 8080,
+    {ok, Port} = application:get_env(port),
     Routes = cowboy_router:compile(routes()),
     cowboy:start_http(http, 100,
                       [{port, Port}],

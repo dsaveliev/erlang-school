@@ -1,4 +1,4 @@
-ERL_RUN_ARGS:=-sname nodeA +pc unicode -pa ebin -config elog -boot start_sasl -s dchat_app start
+ERL_RUN_ARGS:=-sname nodeA +pc unicode -pa ebin -config dchat -boot start_sasl -s dchat_app start
 
 compile:
 	rebar compile skip_deps=true
