@@ -31,6 +31,10 @@ function connect() {
         switch(action) {
         case "joined":
             var node = tokens[1];
+            var online = tokens[2];
+            console.log("online", online);
+            var messages = tokens[3];
+            console.log("messages", messages);
 		    $("#connection_info").text("Connected to " + node);
             break;
         case "msg":

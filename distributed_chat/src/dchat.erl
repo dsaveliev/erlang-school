@@ -3,7 +3,9 @@
 
 -behavior(gen_server).
 
--export([start_link/0, join_client/1, leave_client/1, broadcast_msg/1]).
+-export([start_link/0,
+         join_client/1, leave_client/1, broadcast_msg/1,
+         get_online/0, get_history/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -include("logger.hrl").
@@ -43,6 +45,15 @@ broadcast_msg(Message) ->
     ok.
 
 
+-spec(get_online() -> [user()]).
+get_online() ->
+    gen_server:call(?MODULE, get_online).
+
+
+-spec(get_history() -> [message()]).
+get_history() ->
+    gen_server:call(?MODULE, get_history).
+
 
 %%% gen_server API
 
@@ -50,13 +61,24 @@ init([]) ->
     {ok, #state{}}.
 
 
+handle_call(get_online, _From, #state{online = Online} = State) ->
+    Reply = lists:map(fun({User, _Pid}) -> User end, Online),
+    {reply, Reply, State};
+
+handle_call(get_history, _From, #state{history = History} = State) ->
+    Reply = lists:reverse(History),
+    {reply, Reply, State};
+
 handle_call(Any, _From, State) ->
     ?ERROR("unknown call ~p in ~p ~n", [Any, ?MODULE]),
     {noreply, State}.
 
 
 handle_cast({join_client, {Name, _} = Client}, #state{online = Online} = State) ->
-    Online2 = [Client | Online],
+    Online2 = case lists:member(Client, Online) of
+                  true -> Online;
+                  false -> [Client | Online]
+              end,
     State2 = State#state{online = Online2},
     broadcast({user_join, Name}, State2),
     {noreply, State2};
