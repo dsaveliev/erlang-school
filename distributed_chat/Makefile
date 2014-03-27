@@ -21,7 +21,7 @@ test:
 	rebar eunit skip_deps=true
 
 run:
-	ERL_LIBS=deps erl $(ERL_RUN_ARGS)
+	./start.sh nodeA@localhost 8080
 
 background:
 	ERL_LIBS=deps erl -detached $(ERL_RUN_ARGS)

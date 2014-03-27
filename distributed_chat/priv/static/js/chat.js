@@ -1,3 +1,4 @@
+var chatUrl = "ws://" + document.URL.split("/")[2] + "/api/chat";
 var chat = null;
 var history = [];
 var users = [];
@@ -6,8 +7,8 @@ function connect() {
     var name = $("#user_name").val();
     if(name == "") return;
 
-    console.log("connect");
-	chat = $.bullet('ws://localhost:8080/api/chat', {});
+    console.log("connect", chatUrl);
+	chat = $.bullet(chatUrl, {});
 
 	chat.onopen = function(){
         console.log("onopen");
@@ -37,11 +38,12 @@ function connect() {
             users = online.split("|");
             renderUsers();
 
-            var messages = tokens[3].split("|");
             history = [];
+            var messages = tokens[3].split("|");
             for(var i in messages) {
                 var parts = messages[i].split(":");
-                history.push("<p><b>" + parts[0] + ":</b> " + parts[1] + "</p>");
+                if(parts.length == 2)
+                    history.push("<p><b>" + parts[0] + ":</b> " + parts[1] + "</p>");
             }
             renderHistory();
             break;
