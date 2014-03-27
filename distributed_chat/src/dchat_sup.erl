@@ -18,10 +18,9 @@ init([]) ->
     Restart = permanent, % permanent | transient | temporary
     Shutdown = 2000,     % brutal_kill | int() >= 0 | infinity
 
-    SomeWorker = {some_worker,
-		  {some_worker, start_link, []}, 
-		  Restart, Shutdown, worker, 
-		  [some_worker]},
+    DChat = {dchat,
+             {dchat, start_link, []},
+             Restart, Shutdown, worker,
+             [dchat]},
 
-    {ok, {SupFlags, []}}.
-
+    {ok, {SupFlags, [DChat]}}.
