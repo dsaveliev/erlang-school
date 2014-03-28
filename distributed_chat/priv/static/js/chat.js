@@ -32,7 +32,7 @@ function connect() {
         switch(action) {
         case "joined":
             var node = tokens[1];
-		    $("#connection_info").text("Connected to " + node);
+		    $("#connection_info").html("Connected to <span style='color:#f00;'>" + node + "</span>");
 
             var online = tokens[2];
             users = online.split("|");

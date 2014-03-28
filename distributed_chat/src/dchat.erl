@@ -4,7 +4,7 @@
 -behavior(gen_server).
 
 -export([start_link/0, join_client/1, leave_client/1, broadcast_msg/1,
-         get_online/0, get_history/0, remote_event/1]).
+         get_online/0, get_history/0, cluster_event/1, sync/2]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -include("logger.hrl").
@@ -54,19 +54,25 @@ get_history() ->
     gen_server:call(?MODULE, get_history).
 
 
--spec(remote_event(term()) -> ok).
-remote_event({user_join, Name}) ->
-    gen_server:cast(?MODULE, {join_client, {Name, null}, false}),
+-spec(cluster_event(term()) -> ok).
+cluster_event({user_join, User}) ->
+    gen_server:cast(?MODULE, {join_client, {User, null}, false}),
     ok;
-remote_event({user_leave, Name}) ->
-    gen_server:cast(?MODULE, {leave_client, {Name, null}, false}),
+cluster_event({user_leave, User}) ->
+    gen_server:cast(?MODULE, {leave_client, {User, null}, false}),
     ok;
-remote_event({msg, Message}) ->
+cluster_event({msg, Message}) ->
     gen_server:cast(?MODULE, {broadcast_msg, Message, false}),
     ok;
-remote_event(Event) ->
+cluster_event(Event) ->
     ?ERROR("unknown remote event ~p on node ~p", [Event, node()]),
     ok.
+
+-spec(sync([user()], [message()]) -> ok).
+sync(Online, History) ->
+    gen_server:cast(?MODULE, {sync, Online, History}),
+    ok.
+
 
 %%% gen_server API
 
@@ -87,19 +93,19 @@ handle_call(Any, _From, State) ->
     {noreply, State}.
 
 
-handle_cast({join_client, {Name, _} = Client, SendRemoteEvent}, #state{online = Online} = State) ->
+handle_cast({join_client, {User, _} = Client, SendRemoteEvent}, #state{online = Online} = State) ->
     Online2 = case lists:member(Client, Online) of
                   true -> Online;
                   false -> [Client | Online]
               end,
     State2 = State#state{online = Online2},
-    broadcast({user_join, Name}, SendRemoteEvent, State2),
+    broadcast({user_join, User}, SendRemoteEvent, State2),
     {noreply, State2};
 
-handle_cast({leave_client, {Name, _} = Client, SendRemoteEvent}, #state{online = Online} = State) ->
+handle_cast({leave_client, {User, _} = Client, SendRemoteEvent}, #state{online = Online} = State) ->
     Online2 = lists:delete(Client, Online),
     State2 = State#state{online = Online2},
-    broadcast({user_leave, Name}, SendRemoteEvent, State2),
+    broadcast({user_leave, User}, SendRemoteEvent, State2),
     {noreply, State2};
 
 handle_cast({broadcast_msg, Message, SendRemoteEvent}, #state{history = History} = State) ->
@@ -113,6 +119,11 @@ handle_cast({broadcast_msg, Message, SendRemoteEvent}, #state{history = History}
                end,
     State2 = State#state{history = History3},
     broadcast({msg, Message}, SendRemoteEvent, State2),
+    {noreply, State2};
+
+handle_cast({sync, Online, History}, State) ->
+    Online2 = lists:map(fun(User) -> {User, null} end, Online),
+    State2 = State#state{online = Online2, history = History},
     {noreply, State2};
 
 handle_cast(Any, State) ->
@@ -147,7 +158,7 @@ broadcast(Event, SendRemoteEvent,  #state{online = Online}) ->
     if
         SendRemoteEvent ->
             Nodes = lists:delete(node(), nodes()),
-            rpc:multicall(Nodes, dchat, remote_event, [Event]);
+            rpc:multicall(Nodes, dchat, cluster_event, [Event]);
         true -> do_nothing
     end,
     ok.

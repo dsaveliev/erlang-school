@@ -66,7 +66,14 @@ connect_nodes() ->
                                 net_kernel:connect_node(Node)
                         end, Nodes),
     case lists:member(true, Results) of
-        true -> ?INFO("has connections ~p", [nodes()]);
+        true -> ?INFO("has connections ~p", [nodes()]),
+                [Node | _] = nodes(),
+                Online = rpc:call(Node, dchat, get_online, []),
+                ?INFO("Online: ~p", [Online]),
+                History = rpc:call(Node, dchat, get_history, []),
+                ?INFO("History: ~p", [History]),
+                dchat:sync(Online, History),
+                ok;
         false -> ?INFO("no connections")
     end,
     ok.
