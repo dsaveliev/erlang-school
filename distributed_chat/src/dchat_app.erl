@@ -60,7 +60,7 @@ routes()->
 
 connect_nodes() ->
     {ok, Nodes0} = application:get_env(dchat, nodes),
-    Nodes = lists:filter(fun(Node) -> Node =/= node() end, Nodes0),
+    Nodes = lists:delete(node(), Nodes0),
     ?INFO("try to connect nodes ~p", [Nodes]),
     Results = lists:map(fun(Node) ->
                                 net_kernel:connect_node(Node)
