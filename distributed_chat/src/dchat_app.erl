@@ -68,11 +68,15 @@ connect_nodes() ->
     case lists:member(true, Results) of
         true -> ?INFO("has connections ~p", [nodes()]),
                 [Node | _] = nodes(),
-                Online = rpc:call(Node, dchat, get_online, []),
+                Online = rpc:call(Node, dchat, get_online, [], 3000),
                 ?INFO("Online: ~p", [Online]),
-                History = rpc:call(Node, dchat, get_history, []),
+                History = rpc:call(Node, dchat, get_history, [], 3000),
                 ?INFO("History: ~p", [History]),
-                dchat:sync(Online, History),
+                case {Online, History} of
+                    {{badrpc, _}, _} -> do_nothing;
+                    {_, {badrpc, _}} -> do_nothing;
+                    _ -> dchat:sync(Online, History)
+                end,
                 ok;
         false -> ?INFO("no connections")
     end,

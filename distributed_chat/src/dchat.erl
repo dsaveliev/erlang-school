@@ -158,7 +158,7 @@ broadcast(Event, SendRemoteEvent,  #state{online = Online}) ->
     if
         SendRemoteEvent ->
             Nodes = lists:delete(node(), nodes()),
-            rpc:multicall(Nodes, dchat, cluster_event, [Event]);
+            rpc:multicall(Nodes, dchat, cluster_event, [Event], 1000);
         true -> do_nothing
     end,
     ok.
