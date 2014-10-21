@@ -1,0 +1,149 @@
+* Изучаемые темы (20 часов)
+
+** Основы Erlang (2 часа)
+
+   Работа в erlang-shell.
+
+   atom, tuple, record
+
+   pattern matching
+
+   case, if, guards
+
+   function, close, module, анонимные функции
+
+   Структуры данных: list, proplist, io_list, dict, ets
+
+   Обработка списков с помощью рекурсивных функций с аккумуляторами
+
+   Функции высшего порядка: map, filter, foldl
+
+   List Comprehensions
+
+   Binary, pattern matching with binary
+
+
+** Concurrency (1 час)
+
+   Concurrency and parallelism
+
+   Многопоточность в Erlang
+
+   Жизнь erlang-процесса
+   (бесконечная рекурсия, состояние на стеке)
+
+   Работа с потоками на низком уровне
+   spawn, link, spawn_link,
+   receive, register,
+   monitor, exit, trap exit
+
+
+** OTP (3 часа)
+
+*** gen_server (30 мин)
+
+*** supervisor, gen_fsm, gen_event (30 мин)
+
+*** application (15 мин)
+    Типичная структура OTP проекта
+    с дочерними приложениями и зависимыми библиотеками
+
+*** Обработка ошибок (15 мин)
+    Defensive Programming vs Let it crash
+    Уровни изоляции ошибок
+
+*** упрощенная реализация gen_server (1.5 час) *практика*
+
+
+
+** Инструменты (2 часа)
+
+*** rebar
+    управление зависимостями
+    сборка проекта
+
+*** Логирование
+    report browser
+    lager
+
+*** Мониторинг
+    appmon, pman, tv, webtool
+    observer
+
+*** Статический анализатор
+    dialyzer
+
+
+** Библиотеки (1 час)
+   lager
+   cowboy
+   Сериализация данных: JSON (jsonx), bert, google protocol buffers
+   poolboy
+   epgsql, emysql
+   erlydtl
+
+
+** eunit (1 час) *практика*
+   Тестирование gen_server
+   Тестирование базы данных
+   Тестирование клиентом
+
+
+** Веб-сервер Cowboy (2 часа) *практика*
+   роутинг
+   http хендлер
+   web socket хендлер
+
+
+** Развертывание и запуск ноды (30 мин) *практика*
+   Подключение к ноде через удаленную консоль, мониторинг
+
+
+** Работа с сокетами, практика (2 часа)
+   TCP, UDP
+   Активный и пассивный режим сокета
+   Наивный tcp сервер
+   Ranch Acceptor Pool
+
+
+** реализация key-value хранилища (5.5 часов) *практика*
+   чтобы было интересно, с фичами:
+   - несколько value для одного key, различаемых по timestamp (как в HBase)
+   - сохранение на диск и восстановление
+   - TCP интерфейс (доступ через telnet)
+   - HTTP интерфейсом (используем cowboy)
+   - журналирование
+
+
+* Дополнительные темы
+
+** Отладка, практика (1 час)
+   trace/dbg/sys
+   По erlang-in-anger
+
+
+** Unicode (20 мин)
+
+
+** Веб фреймворки (40 мин)
+   ChicagoBoss, Nitrogen, N2O, Zotonic.
+
+
+** Распределенность, практика (3 часа)
+
+
+** Релизы
+
+
+** Common Test
+
+
+
+* TODO линки для черновиков
+http://yzh44yzh.by/post/gen_server.html
+http://yzh44yzh.by/post/ranch.html
+http://yzh44yzh.by/post/rebar.html
+http://yzh44yzh.by/post/dialyzer.html
+http://yzh44yzh.by/post/trace_dbg.html
+http://yzh44yzh.by/post/erlang_for_web_2.html
+http://yzh44yzh.by/post/distributed_erlang.html
