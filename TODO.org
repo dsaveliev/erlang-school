@@ -1,21 +1,7 @@
-* Создать папки
-  в каждую положить заготовку черновика
-  и запушить это дело
-
-* Перекинуть материалы по другим папкам
-** docs/01_base в 01_t_erlang_base
-** loop_process пересмотреть, переместить в 04_p_gen_server
-** base перекинуть в 07_p_eunit
-** testing пересмотреть, переместить в 07_p_eunit
-** http_server пересмотреть, переместить в 08_p_cowboy
-** naive_tcp_server в 10_p_sockets
-** distributed_chat пересмотреть, переместить в 15_p_distribution
-** смержить
+* смержить код
 key_value_storage/
 key_value_storage_2/
 переместить в 11_p_key_value_storage
-
-** rec2plist -- вообще удалить
 
 * Подготовить темы:
 
