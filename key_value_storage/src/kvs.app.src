@@ -11,5 +11,14 @@
          {num_acceptors, 10},
          {db_options, [{data_file, "priv/data"},
                        {flush_interval, 20000}]}
+         {mode, test},
+         {production, [
+                       {data_file, "priv/data"},
+                       {flush_interval, 20}
+                      ]},
+         {test, [
+                 {data_file, "priv/test_data"},
+                 {flush_interval, 20}
+                ]}
          ]}
   ]}.

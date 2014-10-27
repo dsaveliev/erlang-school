@@ -5,11 +5,11 @@
 
 -export([start_link/1, init/1]).
 
-start_link(DbOptions) ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, [DbOptions]).
+start_link(Options) ->
+    supervisor:start_link({local, ?MODULE}, ?MODULE, Options).
 
 
-init([DbOptions]) ->
+init(Options) ->
     RestartStrategy = one_for_one, % one_for_one | one_for_all | rest_for_one
     MaxRestarts = 10,
     MaxSecondsBetweenRestarts = 60,
@@ -19,10 +19,10 @@ init([DbOptions]) ->
     Shutdown = 2000,     % brutal_kill | int() >= 0 | infinity
     Type = worker,       % worker | supervisor
 
-    Kvs = {kvs, 
-           {kvs, start_link, [DbOptions]},
-           Restart, Shutdown, Type, 
-           [kvs]}, 
+    Kvs = {kvs,
+		  {kvs, start_link, [Options]}, 
+		  Restart, Shutdown, worker, 
+		  [kvs]},
 
     {ok, {SupFlags, [Kvs]}}.
 

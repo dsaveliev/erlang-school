@@ -1,3 +1,0 @@
-# kvs
-
-project description here
