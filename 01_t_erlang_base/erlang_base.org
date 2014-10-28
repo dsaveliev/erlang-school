@@ -1,6 +1,7 @@
-## Основы Erlang 
+* Основы Erlang
 
-### Работа в erlang-shell. 
+** Работа в erlang-shell
+
 запуск erl
 выход C-G q
 help()
@@ -14,7 +15,7 @@ flush()    -- flush any messages sent to the shell
 q()        -- quit - shorthand for init:stop()
 
 i()        -- information about the system
-i(X,Y,Z)   -- information about pid <X,Y,Z>
+i(X,Y,Z)   -- information about pid <X,Y,Z>Еще
 m()        -- which modules are loaded
 m(Mod)     -- information about module <Mod>
 memory()   -- memory allocation information
@@ -28,12 +29,36 @@ C-G User switch command
   j                 - list all jobs
   s [shell]         - start local shell
   r [node [shell]]  - start remote shell
-  q        - quit erlang
+  q                 - quit erlang
   ? | h             - this message
 
 
-### atom, tuple, record
-atom -- константное значение
+** integer, float
+
+integer()
+small int 1 байт
+int       4 байта
+small bignum 1 байт заголовок
+large bignum 4 байта заголовок
+
+#+BEGIN_SRC Erlang
+1> 2#101010.
+42
+2> 8#0677.
+447
+3> 16#AE.
+174
+#+END_SRC
+
+float()
+IEEE 754
+
+
+** atom, tuple, list, array, record
+
+*** atom
+
+константное значение
 'Atom in single quote'
 
 Аналог в Java -- enum
@@ -43,29 +68,116 @@ enum Season { WINTER, SPRING, SUMMER, AUTUMN }
 define WIDTH       80
 
 делают код более понятным:
+#+BEGIN_SRC Erlang
 {ok, Value}
 {error, Reason}
 {user, "Bob", 22}
 -type(my_bool() :: true | false | undefined).
+#+END_SRC
 
 хранятся в таблице атомов, занимают 4 или 8 байт, эта память не освобождается
+(4 bytes/atom in a 32-bit system, 8 bytes/atom in a 64-bit system).
 
-tuple, кортеж -- обычная структура данных для функциональных языков, но почти не встречается в языках императивных. Подобно списку, это набор значений, доступных по их позиции. Но кортеж имеет фиксированную длинну, не больше и не меньше. Такая структура может показаться странной, но она очень удобна в pattern matching. И поэтому используется повсемесно, так же как и сам pattern matching.
 
-В императивных языках обычно используют словари (в Java, наример, варианты Map), там где в функциональных используют кортежи. Кортежи проигрывают в ясности значений, зато сильно выигрывают в лаконичности кода. Ну а ясность значений можно подчеркнуть там, где это необходимо
+*** tuple
+
+Кортеж -- обычная структура данных для функциональных языков,
+но почти не встречается в языках императивных. Подобно списку, это
+набор значений, доступных по их позиции. Но кортеж имеет фиксированную
+длинну, не больше и не меньше. Такая структура может показаться
+странной, но она очень удобна в pattern matching. И поэтому
+используется повсемесно, так же как и сам pattern matching.
+
+В императивных языках обычно используют словари (в Java, наример,
+варианты Map), там где в функциональных используют кортежи. Кортежи
+проигрывают в ясности значений, зато сильно выигрывают в лаконичности
+кода. Ну а ясность значений можно подчеркнуть там, где это необходимо
 
 Для этого первым элементом обычно ставят атом, указывающий на суть данных:
-{point, 10, 15} 
+#+BEGIN_SRC Erlang
+{point, 10, 15}
 {rect, {point, 10, 10}, {point, 20, 20}}
 {user, 22, "Bob"}
 {direction, up}
 {error, "user not found"}
+#+END_SRC
+Это называется тэгированый кортеж.
 
-Но все-таки кортежи сами по себе хороши для небольших объектов, на 2-4 поля. Если нужно больше полей, то тут на помощь приходит record
+Но все-таки кортежи сами по себе хороши для небольших объектов, на 2-4
+поля. Если нужно больше полей, то тут на помощь приходит record
 
 
-record, запись. Представляет собой синтаксический сахар, добавленный в язык позже. На этапе компиляции превращается в обычный кортеж и имена полей теряются. Зато принципы работы с ними вполне аналогичны работе со словорями в других языках.
+*** list
 
+рабочая лошадка всех функциональных языков. Основная структура
+данных. А в некоторых языках (в Lisp) -- вообще единственная структура
+данных. Представляет собой однонаправленный связанный список.
+
+Стоимость операций:
+- добавить в начало списка - 1
+- добавить в конец списка - O(n)
+- получить N-й элемент - O(n)
+- конкатернация двух списков - O(n)
+
+Поэтому всегда работают с началом списка. А конкатернации можно и
+нужно избегать, используя вместо нее io_list.
+
+Могут быть какой угодно вложенности
+#+BEGIN_SRC Erlang
+[1,2,[1,2,3],3]
+#+END_SRC
+
+Могут быть правильные (proper) и неправильные (nonproper)
+#+BEGIN_SRC Erlang
+[1,2,3]
+[1 | [2,3]]
+[1,2 | [3]]
+[1,2 | 3]
+#+END_SRC
+
+
+*** io_list
+
+Очень удобная структура данных. Особенно в работе с сокетами, или для
+вебсервера.  Обычно данные, которые нужно отправить клиенту,
+генерируются кусками из разных источников. И потом все эти куски
+сшить. Но данные можно не сшивать сразу, а собирать во
+вложенные массивы.
+
+#+BEGIN_SRC Erlang
+Part1 = [1,2,3]
+Part2 = [4,5,6]
+Part3 = [Part1, Part2]
+All = [8,9,Part3,10,11]
+lists:flatten(All)
+#+END_SRC
+
+Эта функция делает из массивов любой вложенности плоский массив за один проход. O(n).
+
+Итак io_list это list, включающий byte(), binary(), io_list()
+польза от него в том, что сокеты принимают его как есть, без flatten и без преобразований в binary
+
+
+*** array
+
+Это не настоящие массивы, как в императивных языках. В них нет главной фишки массивов:
+доступа к любому элементу за константное время, и изменения любого элемента
+за константное время.
+
+Более того любая модификация потребует
+полного копирования массива и, соответственно, времени O(n).
+
+Поэтому эти массивы нигде не используются :)
+
+
+*** record
+
+Представляет собой синтаксический сахар, добавленный в
+язык позже. На этапе компиляции превращается в обычный кортеж и имена
+полей теряются. Зато принципы работы с ними вполне аналогичны работе
+со словорями в других языках.
+
+#+BEGIN_SRC Erlang
 -record(user, {id, name, age}). % {user, undefined, undefined, undefined}
 -record(user, {id = 0, name = "", age = 0}). % {user, 0, "", 0}
 -record(user, {
@@ -73,79 +185,125 @@ record, запись. Представляет собой синтаксичес
     name = "" :: string(),
     age = 0 :: age()
     }).
-    
+
 User = #user{}
 User = #user{id = 5}
 User = #user{id = 5, name = "Bob", age = 24}
 UserId = User#user.id
 UserName = User#user.name
 User2 = User#user{id = 7}.
+#+END_SRC
 
 Функции для работы с записями из консоли:
 rd(R,D)    -- define a record
 rl()       -- display all record information
 rr(File)   -- read record information from File (wildcards allowed)
 
+#+BEGIN_SRC Erlang
 2> rd(user, {id, name, age}).
 user
 3> rl().
 -record(user,{id,name,age}).
 ok
 4> {user, 5, "Bob", 23}.
-\#user{id = 5,name = "Bob",age = 23}
+#user{id = 5,name = "Bob",age = 23}
 5> Bob = #user{id = 6, name = "Bob"}.
-\#user{id = 6,name = "Bob",age = undefined}
+#user{id = 6,name = "Bob",age = undefined}
 6> Bill = Bob#user{name = "Bill"}.
-\#user{id = 6,name = "Bill",age = undefined}
+#user{id = 6,name = "Bill",age = undefined}
 7> Bob#user.id.
-6
-8> rr("kvs.erl").
-[state]
-9> rl().
--record(state,{data\_file,items = []}).
--record(user,{id,name,age}).
-ok
-10> State = #state{}.
-\#state{data\_file = undefined,items = []}
-11> State2 = #state{items = [1,2,3]}.
-\#state{data_file = undefined,items = [1,2,3]}
-12> 
+#+END_SRC
 
 
-### pattern matching
+** pattern matching
 
-Сопоставление с образцом, корявый термин, но очень мощная синтаксическая конструкция. Используется повсеместно для кучи разных целей:
-- присваивание значения
-- выборка значения из кортежа или списка
-- проверка условия
-- конструкции условного перехода
+Сопоставление с образцом, мощная синтаксическая конструкция.
+Используется повсеместно для многих целей.
 
-Используется:
-- клозы функций
-- case
-- receive
-- try..catch
-
-Настолько повсеместно, что в Erlang даже нет операции присваивания, а оператор = выполняет pattern matching ). То есть в коде:
+В Erlang даже нет операции присваивания, а оператор = выполняет pattern matching ).
+#+BEGIN_SRC Erlang
 X = 10
-происходит матчинг значения 10 в неопределенную переменную X.
+#+END_SRC
+Тут происходит матчинг значения 10 в неопределенную переменную X.
+
+Используется для выборки значения из кортежа или списка (из сложных структур данных):
+#+BEGIN_SRC Erlang
+1> User = {user, 42, "Bob"}.
+{user,42,"Bob"}
+2> {user, Age, _} = User.
+{user,42,"Bob"}
+3> Age.
+42
+4> User2 = {user, 77, "Bill"}.
+{user,77,"Bill"}
+5> Users = [User, User2].
+[{user,42,"Bob"},{user,77,"Bill"}]
+6> [_, {user, Id, _} | _] = Users.
+[{user,42,"Bob"},{user,77,"Bill"}]
+7> Id.
+77
+#+END_SRC
 
 
-выше определен UserId
+Для реализации условных переходов. Тут несколько вариантов:
+
+Клозы функций
+#+BEGIN_SRC Erlang
+1> F = fun({man, Name}) -> "Hello " ++ Name;
+1> ({dog, Name}) -> "Hi " ++ Name
+1> end.
+#Fun<erl_eval.6.80484245>
+2> F({man, "Bob"}).
+"Hello Bob"
+3> F({dog, "Rex"}).
+"Hi Rex"
+#+END_SRC
+
+case
+#+BEGIN_SRC Erlang
+case Result of
+    {ok, Val} -> do_something(Val);
+    {error, Error} -> log_error(Error), do_something(DefaultVal)
+end.
+#+END_SRC
+
+receive
+#+BEGIN_SRC Erlang
+receive
+    stop -> stop();
+    {Pid, Message} -> process(Message), Pid ! received
+end.
+#+END_SRC
+
+try..catch
+#+BEGIN_SRC Erlang
+try
+    do_something()
+catch
+    throw:Error -> log_error(Error);
+    error:SystemError -> log_error(SystemError), stop()
+end.
+#+END_SRC
+
+Вот интересный пример:
+#+BEGIN_SRC Erlang
 %% check table owner leave table in waiting state
-case personal_table:get_table_for_room(RoomId) of
-    {ok, #ptable{id = TableId, owner = UserId}} ->
-        bingo_room_manager:close_table_and_room(TableId, RoomId);
-    _ -> do_nothing
-end;
-Находим стол, и сразу матчингом UserId проверяем владельца
-ну разве не прелесть?
+check_room_owner(RoomId, OwnerId) ->
+    case personal_table:get_table_for_room(RoomId) of
+        {ok, #ptable{id = TableId, owner = OwnerId}} ->
+            bingo_room_manager:close_table_and_room(TableId, RoomId);
+        _ -> do_nothing
+    end
+end
+#+END_SRC
+Находим стол, и сразу матчингом UserId проверяем владельца.
 
 
-### case, if, guards
+** case, if, guards
 
+#+BEGIN_SRC Erlang
 case find_user(UserId) of
-    {ok, User} -> do_something(User), % код с побочными эффектами -- это нормально для Erlang
+    {ok, User} -> do_something(User),
                   true;
     {error, not_found} -> false
 end
@@ -160,102 +318,301 @@ if
     User#user.age > 21 -> do_other(User), true;
     true -> false
 end
+#+END_SRC
 
 if -- это как если бы из case убрать вычисление значение и матчинг с образцами, но оставить только гарды
 
-
-### function, close, module, анонимные функции
-
-чего тут писать, тут кодить надо
-base/utils.erl
+and, or - вычисляют оба аргумента
+andalso, orelse - вычисляют минимум аргументов
+comma is and, semicolon is or
 
 
-### Структуры данных: list, array, proplist, io_list, dict, ets
+** KV-структуры данных: proplist, io_list, dict, ets
 
-list -- рабочая лошадка всех функциональных языков. Основная структура данных. А в некоторых языках (в Lisp) -- вообще единственная структура данных. Представляет собой однонаправленный связанный список.
+*** proplists
 
-Стоимость операций:
-- добавить в начало списка - 1
-- добавить в конец списка - O(n)
-- получить N-й элемент - O(n)
-- конкатернация двух списков - O(n)
-
-Поэтому всегда работают с началом списка. А конкатернации можно и нужно избегать, используя вместо нее io_list.
-
-Могут быть какой угодно вложенности
-[1,2,[1,2,3],3]
-
-Могут быть правильные (proper) и неправильные (nonproper)
-[1,2,3]
-[1 | [2,3]]
-[1,2 | [3]]
-[1,2 | 3]
-
-
-Преимущетсво array перед связаным списком -- это константное время доступа к любому элементу. 
-В большинстве функциональных языков такой структуры данных нет. Но в Erlang есть, хотя им редко пользуются. Реализация не документирована, и имеет ли array в Erlang свои преимущетсва я не знаю.
- The representation is not documented and is subject to change without notice.
-Можно предположить, что либо модуль реализован полностью на BIF, либо как-то поверх list. Во втором случае он не будет иметь никаких преимуществ.
-
-proplists
 CRUD:
-add item: [{Key, Value} | List]
-get item: proplists:get_value(Key, List) % (Key, List, Default)
-delete: proplists:delete(Key, List)
-update функции готовой нет. Можно просто добавить элемент с тем же ключом в начало, и get\_value будет возвращать его. А можно
+#+BEGIN_SRC Erlang
+%% add item:
+List2 = [{Key, Value} | List]
+
+%% get item:
+Value = proplists:get_value(Key, List)
+
+%% delete item:
+List3 = proplists:delete(Key, List)
+#+END_SRC
+
+update как такового нет. Можно просто добавить элемент с тем же
+ключом в начало, и get_value будет возвращать его.
+#+BEGIN_SRC Erlang
+[{Key, Value} | List]
+#+END_SRC
+
+А можно добавить элемент с одновременным удалением по ключу
+#+BEGIN_SRC Erlang
 [{Key, Value} | proplists:delete(Key, List)]
+#+END_SRC
+
 Из этого следует, что в списке могут быть несколько значений с одним ключом
-get\_all\_values
+
+get_all_values
+
 Используется как небольшое KV хранилище. Не больше нескольких десятков элементов.
 Часто для хранения и передачи настроек или опций.
 
 
-io_list
-Очень удобная структура данных. Особенно в работе с сокетами, или для вебсервера.
-Обычно данные, которые нужно отправить клиенту, генерируются кусками из разных источников. И потом все эти куски сшить. То есть, прибегнуть к конкатернации. А она, как мы знаем, дорога.
-Есть выход, данные можно не сшивать сразу, а собирать во вложенные массивы
-Part1 = [1,2,3]
-Part2 = [4,5,6]
-Part3 = [Part1, Part2]
-All = [8,9,Part3,10,11]
-И в конце один раз сделать
-lists:flatten(All)
-Эта функция делает из массивов любой вложенности плоский массив за один проход. O(n).
+*** dict, ord_dict, bg_trees
 
-Итак io\_list это list, включающий byte(), binary(), io_list()
-польза от него в том, что сокеты принимают его как есть, без flatten и без преобразований в binary
+другие KV структуры данных:
+dict, orddict, gb_trees (general balanced trees)
+
+#+BEGIN_SRC Erlang
+1> D = dict:new().
+2> D2 = dict:append(1, "Bob", D).
+3> D3 = dict:append(2, "Bill", D2).
+4> dict:find(1, D3).
+{ok,["Bob"]}
+5> dict:find(2, D3).
+{ok,["Bill"]}
+6> dict:find(3, D3).
+error
+8> D4 = dict:append(1, "John", D3).
+9> dict:find(1, D4).
+{ok,["Bob","John"]}
+10> D5 = dict:erase(1, D4).
+11> dict:find(1, D5).
+error
+12> dict:to_list(D5).
+[{2,["Bill"]}]
+13> dict:fetch(2, D5).
+["Bill"]
+14> dict:fetch(1, D5).
+** exception error: bad argument
+#+END_SRC
+
+orddict хранит ключи в сортированом виде, поэтому быстрый поиск по
+ключу, но медленное добавление.
+
+gb_trees хранит ключи, понятно, в дереве. Поэтому еще более быстрый
+поиск O(ln(n)), но добавление может оказаться медленным, из-за
+необходимости перебалансировать дерево.
 
 
-dict
+*** ets
+
+примеры CRUD
+#+BEGIN_SRC Erlang
+1> Ets = ets:new(my_ets, [set, protected]).
+16400
+2> ets:insert(Ets, {1, "Bob", 25}).
+true
+3> ets:insert(Ets, [{2, "Bill", 30}, {3, "Helen", 22}]).
+true
+4> ets:lookup(Ets, 1).
+[{1,"Bob",25}]
+5> ets:lookup(Ets, 3).
+[{3,"Helen",22}]
+6> ets:lookup(Ets, 4).
+[]
+7> ets:insert(Ets, {3, "Helen A.", 21}).
+true
+8> ets:lookup(Ets, 3).
+[{3,"Helen A.",21}]
+9> ets:delete(Ets, 2).
+true
+10> ets:lookup(Ets, 2).
+[]
+#+END_SRC
+
+set, ordered_set, bag, duplicate_bag
+public, protected, private
+
+Обход таблицы:
+#+BEGIN_SRC Erlang
+11> F = ets:first(Ets).
+3
+12> N1 = ets:next(Ets, F).
+1
+13> N2 = ets:next(Ets, N1).
+'$end_of_table'
+#+END_SRC
+
+Самый эффективный способ выбрать группу объектов (или даже все):
+#+BEGIN_SRC Erlang
+17> ets:match(Ets, {'$1', '_', '_'}).
+[[1],[3]]
+18> ets:match(Ets, {'$1', '$2', '_'}).
+[[1,"Bob"],[3,"Helen A."]]
+19> ets:match(Ets, '$1').
+[[{1,"Bob",25}],[{3,"Helen A.",21}]]
+#+END_SRC
+
+Особенности concurrency:
+
+Добавление, удаление, обновление одиночного объекта атомарно и изолировано.
+
+Атомарно, это значит транзация либо завершится успешно, либо будет отменена.
+Изолировано, это значит, что во время действия транзации ее промежуточные
+результаты не будут видны другим процессам.
+
+Однако при обходе таблицы с помощью first/next гарантий нет. Если во время такого обхода
+таблица будет модифицироваться, то возможно, будут пропущены некоторые объекты.
+
+То же касается выборки объектов с помощью match или select.
 
 
-есть еще orddict и gb_trees (general balanced trees)
-orddict хранит ключи в сортированом виде, поэтому быстрый поиск по ключу, но медленное добавление
-gb\_trees хранит ключи, понятно, в дереве. Поэтому еще более быстрый поиск O(ln(n)), но добавление может оказаться медленным, из-за необходимости перебалансировать дерево.
+*** dets, mnesia
 
+dest добавляет хранение данных на диске
 
-ets
+mnesia -- распределенное KV хранилище с поддержкой транзакций.
+Ее никто не использует, кроме Ericsson. Препдочитают другие базы данных, например Riak.
 
+Итого, из KV структур данных у нас: proplists, dict, orddict, gb_trees и ets.
+На небольших данных, как вы понимаете, разницы нет.
 
-dets, mnesia
-
-
-Итого, из KV структур данных у нас: proplists, dict, orddict, gb_trees и ets
-прилично. На небольших данных, как вы понимаете, разницы нет.
 И я использую самое простое -- proplist, он понятно выводится в консоль )
-А для больших данных я сразу беру тяжелую артиллерию -- ets 
-Вот и весь мой рецепт :)
+А для больших данных я сразу беру тяжелую артиллерию -- ets.
 
 
+** Обработка списков с помощью рекурсивных функций с аккумуляторами
 
-### Обработка списков с помощью рекурсивных функций с аккумуляторами
+Хвостовая рекурсия.
+
+[[src/base.erl][код src/base.erl]]
 
 
-### Функции высшего порядка: map, filter, foldl
+** Функции высшего порядка: map, filter, foldl
+
+http://www.erlang.org/doc/man/lists.html#map-2
+map(Fun, List1) -> List2
+Fun = fun((A) -> B)
+
+http://www.erlang.org/doc/man/lists.html#filter-2
+filter(Pred, List1) -> List2
+Pred = fun((Elem :: T) -> boolean())
+
+http://www.erlang.org/doc/man/lists.html#foldl-3
+foldl(Fun, Acc0, List) -> Acc1
+Fun = fun((Elem :: T, AccIn) -> AccOut)
+
+filtermap/2
+flatten/1
+foldr/3
+partition/2
 
 
-### List Comprehensions
+** List Comprehensions
 
-но я не очень часто использую, препочитаю map и filter )
+Сочетает map и filter
 
-### Binary, pattern matching with binary
+#+BEGIN_SRC Erlang
+[2*X || X <- List]
+
+pythag(N) ->
+    [{A, B, C} ||
+        A <- lists:seq(1, N),
+        B <- lists:seq(1, N),
+        C <- lists:seq(1, N),
+        A + B + C =< N,
+        A * A + B * B =:= C * C
+    ]
+#+END_SRC
+
+
+** Binary, pattern matching with binary
+
+#+BEGIN_SRC Erlang
+1> B1 = term_to_binary(1).
+<<131,97,1>>
+
+2> B2 = term_to_binary(500).
+<<131,98,0,0,1,244>>
+
+3> B3 = term_to_binary(math:pow(2, 40)).
+<<131,99,49,46,48,57,57,53,49,49,54,50,55,55,55,54,48,48,
+  48,48,48,48,48,48,101,43,49,50,0,...>>
+
+4> B4 = term_to_binary([1,2,3,4]).
+<<131,107,0,4,1,2,3,4>>
+
+7> <<131, Tag:8, _Rest/binary>> = B1.
+<<131,97,1>>
+8> Tag.
+97
+
+10> <<131, Tag2:8, _/binary>> = B2.
+<<131,98,0,0,1,244>>
+11> Tag2.
+98
+
+12> <<131, Tag3:8, _/binary>> = B3.
+<<131,99,49,46,48,57,57,53,49,49,54,50,55,55,55,54,48,48,
+  48,48,48,48,48,48,101,43,49,50,0,...>>
+13> Tag3.
+99
+
+14> <<131, Tag4:8, _/binary>> = B4.
+<<131,107,0,4,1,2,3,4>>
+15> Tag4.
+107
+
+16> B5 = term_to_binary([500, 600, 700]).
+<<131,108,0,0,0,3,98,0,0,1,244,98,0,0,2,88,98,0,0,2,188,
+  106>>
+17> <<_:16, Length:32, _/binary>> = B5.
+<<131,108,0,0,0,3,98,0,0,1,244,98,0,0,2,88,98,0,0,2,188,
+  106>>
+18> Length.
+3
+19> <<_:16, _:32, 98, I1:32, 98, I2:32, _/binary>> = B5.
+<<131,108,0,0,0,3,98,0,0,1,244,98,0,0,2,88,98,0,0,2,188,
+  106>>
+20> I1.
+500
+21> I2.
+600
+
+#+END_SRC
+
+** String, unicode
+
+http://www.erlang.org/doc/man/string.html
+
+http://www.erlang.org/doc/man/unicode.html
+
+#+BEGIN_SRC Erlang
+1> B = <<"Привет мир"/utf8>>.
+<<"Привет мир"/utf8>>
+
+2> io:format("~p", [B]).
+<<208,159,209,128,208,184,208,178,208,181,209,130,32,208,188,208,184,209,128>>ok
+
+3> binary_to_list(B).
+[208,159,209,128,208,184,208,178,208,181,209,130,32,208,188,
+ 208,184,209,128]
+
+4> L = unicode:characters_to_list(B).
+"Привет мир"
+
+5> io:format("~w", [L]).
+[1055,1088,1080,1074,1077,1090,32,1084,1080,1088]ok
+
+6> string:tokens(L, " ").
+["Привет","мир"]
+#+END_SRC
+
+Не работает:
+#+BEGIN_SRC Erlang
+17> string:to_lower(L).
+"Привет мир"
+18> string:to_upper(L).
+"Привет мир"
+19> string:to_lower("Hello World").
+"hello world"
+20> string:to_upper("Hello World").
+"HELLO WORLD"
+#+END_SRC
+
+https://github.com/erlang-unicode/ux

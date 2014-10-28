@@ -4,26 +4,17 @@ xx_T -- теория
 xx_P -- практика
 
 ** 01_T Основы Erlang (2 часа)
-
-   Работа в erlang-shell.
-
-   atom, tuple, record
-
+   Работа в erlang-shell
+   integer, float
+   atom, tuple, list, array, record
    pattern matching
-
    case, if, guards
-
-   function, close, module, анонимные функции
-
-   Структуры данных: list, proplist, io_list, dict, ets
-
+   KV-структуры данных: proplist, io_list, dict, ets
    Обработка списков с помощью рекурсивных функций с аккумуляторами
-
    Функции высшего порядка: map, filter, foldl
-
    List Comprehensions
-
    Binary, pattern matching with binary
+   String, unicode
 
 
 ** 02_T Concurrency (1 час)
