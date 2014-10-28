@@ -1,4 +1,4 @@
--module(loop2).
+-module(gs2).
 
 -export([start/0, loop/1]).
 
@@ -22,4 +22,3 @@ loop(State) ->
         stop -> io:format("~p stops now ~n", [self()]);
         _Any -> ?MODULE:loop(State)
     end.
-            

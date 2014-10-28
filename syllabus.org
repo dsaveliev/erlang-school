@@ -18,7 +18,6 @@ xx_P -- практика
 
 
 ** 02_T Concurrency (1 час)
-
    Concurrency and parallelism
 
    Многопоточность в Erlang
@@ -33,7 +32,6 @@ xx_P -- практика
 
 
 ** 03_T OTP (1 час)
-
    gen_server
    supervisor, gen_fsm, gen_event
 
@@ -47,9 +45,10 @@ xx_P -- практика
 
 
 ** 04_P упрощенная реализация gen_server (2 часа)
+   Пишем свою реализацию gen_server в несколько этапов
+
 
 ** 05_T Инструменты (2 часа)
-
    rebar
    управление зависимостями
    сборка проекта
@@ -129,7 +128,6 @@ xx_P -- практика
 
 
 * TODO линки для черновиков
-http://yzh44yzh.by/post/gen_server.html
 http://yzh44yzh.by/post/ranch.html
 http://yzh44yzh.by/post/rebar.html
 http://yzh44yzh.by/post/dialyzer.html

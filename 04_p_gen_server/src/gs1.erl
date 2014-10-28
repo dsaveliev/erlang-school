@@ -1,4 +1,4 @@
--module(loop1).
+-module(gs1).
 
 -export([start/0]).
 
@@ -13,4 +13,3 @@ loop() ->
         Msg -> io:format("~p receive ~p~n", [self(), Msg]),
                loop()
     end.
-            
