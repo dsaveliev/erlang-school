@@ -1,0 +1,68 @@
+* Многопоточность
+
+** Concurrency and parallelism
+
+Concurrency refers to the idea of having many actors running
+independently, but not necessarily all at the same time.
+
+Parallelism is having actors running exactly at the same time.
+
+До R13B Эрланг работал на одном ядре процессора, и имел concurrency,
+но не имел parallelism.
+
+
+** Многопоточность в Erlang
+
+Создание и остановка потока очень быстрые (3-5 микросекунд).
+Потоки легкие, 2.5Кб памяти на старте.
+
+Отправка сообщений
+
+Почтовый ящик
+
+Планировщики
+
+
+** Жизнь erlang-процесса
+
+бесконечная рекурсия, состояние на стеке
+
+важность хвостовой рекурсии
+
+[[src/lifecycle.erl][src/lifecycle.erl]]
+
+pman:start()
+observer:start()
+
+
+** Работа с потоками на низком уровне
+
+http://www.erlang.org/doc/man/erlang.html#spawn-1
+
+spawn, send message, receive
+
+selective receive
+
+register
+
+link, spawn_link
+{'EXIT', Pid, Reason}
+
+
+monitor
+{'DOWN', Reference, process, Pid, Reason}
+
+exit, trap exit
+
+process_flag(trap_exit, true).
+сигнал 'EXIT' превращает в сообщение 'EXIT', которое можно обработать.
+
+|--------------+--------------------------------+-------------------------------|
+| Reason       | trap_exit=true                 | trap_exit=false               |
+|--------------+--------------------------------+-------------------------------|
+| exit(normal) | Receives {'EXIT', Pid, normal} | Nothing happens               |
+|--------------+--------------------------------+-------------------------------|
+| exit(kill)   | Terminates with reason killed  | Terminates with reason killed |
+|--------------+--------------------------------+-------------------------------|
+| exit(Other)  | Receives {'EXIT', Pid, Other}  | Terminates with reason Other  |
+|--------------+--------------------------------+-------------------------------|
