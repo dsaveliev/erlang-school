@@ -9,14 +9,96 @@ http://ninenines.eu/docs/en/cowboy/HEAD/guide/
 
 ** роутинг
 
+http://ninenines.eu/docs/en/cowboy/HEAD/guide/routing/
+
+Роутинг имеет довольно громоздкий синтаксис.
+Ковбой анализирует URI запроса, и, учитывая хост и путь к ресурсу,
+выбирает обработчик.
+
+Routes = [Host1, Host2, ... HostN]
+где Host, это
+{HostMatch, PathsList}
+где PathList это
+[Path1, Path2, ... PathN]
+где Path это
+{PathMatch, Handler, Opts}
+
+лучше сразу взять конкретный пример:
+
 #+BEGIN_SRC Erlang
+    Routing =
+        [{'_',                        % any host
+          [                           % path list
+           {"/api/chat/",             % path match
+            bullet_handler,           % handler
+            [{handler, chat_handler}] % options
+           },
+           {"/",
+            cowboy_static,
+            {file, "priv/static/index.html", [{mimetypes, cow_mimetypes, all}]}},
+           {"/[...]",
+            cowboy_static,
+            {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
+           {'_',
+            not_found_handler,
+            []}
+          ]}],
+#+END_SRC
+
+Биндинги:
+#+BEGIN_SRC Erlang
+/user/:id/profile/ % /user/77/profile, /user/42/profile
+
+Id = cowboy_req:binding(id, Req) % <<"77">>, <<"42">>
+#+END_SRC
+
+Необязательные сегменты:
+#+BEGIN_SRC Erlang
+/posts/[page/:number] % /posts, /posts/page/2
+#+END_SRC
+
+Эти Routing нужно скомпилировать, чтобы получить эффективное по
+производительности внутреннее представление:
+#+BEGIN_SRC Erlang
+Routing2 = cowboy_router:compile(Routing)
+#+END_SRC
+
+И потом можно запускать ковбой:
+#+BEGIN_SRC Erlang
+cowboy:start_http(http, 100,
+                  [{port, 8080}],
+                  [{env, [{dispatch, Routing2}]}])
+#+END_SRC
+
+Здесь мы запускаем ковбой для обработки http запросов (для https нужно запускать отдельно),
+с пулом из 100 акцепторов соединений, на порту 8080, с заданным роутингом.
+
+Роутинг можно изменить, не останавливая сервер:
+#+BEGIN_SRC Erlang
+Routing2 = cowboy_router:compile(NewRouting),
+cowboy:set_env(my_http_listener, dispatch, Rounting2).
 #+END_SRC
 
 
 ** статические файлы
 
+Для статического контента используется хендлер cowboy_static
+
+В Options ему можно указать конкретный файл:
 #+BEGIN_SRC Erlang
+{"/",
+ cowboy_static,
+ {file, "priv/static/index.html", [{mimetypes, cow_mimetypes, all}]}},
 #+END_SRC
+
+Либо можно указать каталог:
+#+BEGIN_SRC Erlang
+{"/static/[...]",
+ cowboy_static,
+ {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
+#+END_SRC
+Здесь для всех путей вида http://host/static/bla/bla/bla
+будет отдаваться файл priv/static/bla/bla/bla.
 
 
 ** http хендлер
@@ -25,7 +107,7 @@ http://ninenines.eu/docs/en/cowboy/HEAD/guide/
 #+END_SRC
 
 
-** web socket хендлер (и bullet.js клиент)
+** erlydtl шаблоны
 
 #+BEGIN_SRC Erlang
 #+END_SRC
@@ -37,7 +119,7 @@ http://ninenines.eu/docs/en/cowboy/HEAD/guide/
 #+END_SRC
 
 
-** erlydtl шаблоны
+** web socket хендлер (и bullet.js клиент)
 
 #+BEGIN_SRC Erlang
 #+END_SRC
