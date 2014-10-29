@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Привет от Cowboy!</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+  </head>
+  <body style="margin-left:40px;">
+  <h1>ErlyDTL шаблон</h1>
+
+  <p><ul>
+  <li>Имя: {{name}}</li>
+  <li>Email: {{email}}</li>
+  <li>Город: {{city}}</li>
+  </ul></p>
+
+  {% for id, text in messages %}
+  <p><b>{{id}}</b> {{text}}</p>
+  {% endfor %}
+
+  </body>
+</html>

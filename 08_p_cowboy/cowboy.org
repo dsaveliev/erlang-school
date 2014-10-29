@@ -131,8 +131,46 @@ yura ~ $ curl "http://localhost:8080/user/88/profile" \
 
 ** erlydtl шаблоны
 
+Быстрые, компилируются в эрланговский модуль (beam-файл),
+загружаются на старте ноды и хранятся в оперативной памяти а не читаются с диска
+при каждом запросе.
+
+https://github.com/erlydtl/erlydtl/
+
+Проще всего их собирать ребаром. Для этого в rebar.config добавить:
 #+BEGIN_SRC Erlang
+{erlydtl_opts, [
+                {doc_root, "priv/templates"}
+]}.
+{deps, [
+       ...
+        {erlydtl, ".*", {git, "https://github.com/erlydtl/erlydtl", "0.9.4"}}
+       ]}.
 #+END_SRC
+
+Тогда при сборке из файла priv/templates/sample.dtl получается ebin/sample_dtl.beam
+
+Чтобы подставить данные в шаблон, нужно:
+#+BEGIN_SRC Erlang
+{ok, Body} = sample_dtl:render([{name, UserName},
+                                {email, <<"some@where.com">>},
+                                {city, <<"Minsk">>},
+                                {messages, [{1, "Message 1"},
+                                            {2, "Message 2"},
+                                            {3, "Message 3"}]}])
+#+END_SRC
+
+Если шаблон изменился, и его хочется подгрузить, не останавливая сервер,
+это делается, как с любым эрланговским модулем: сперва перекомпилировать
+#+BEGIN_SRC Erlang
+rebat compile
+#+END_SRC
+затем подгрузить
+#+BEGIN_SRC Erlang
+l(sample_dtl).
+#+END_SRC
+
+Или использовать sync, обеспечивающий автоматическую загрузку измененных модулей.
 
 
 ** поддержка сессий

@@ -18,6 +18,7 @@ start(_StartType, _StartArgs) ->
           [
            %% {"/api/chat/", bullet_handler, [{handler, chat_handler}]},
            {"/user/:user_id/profile/", sample_http_handler, []},
+           {"/user/:name/messages", sample_template_handler, []},
            {"/", cowboy_static, {file, "priv/static/index.html", [{mimetypes, cow_mimetypes, all}]}},
            {"/[...]", cowboy_static, {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
            {'_', not_found_handler, []}
