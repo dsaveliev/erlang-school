@@ -172,11 +172,54 @@ l(sample_dtl).
 
 Или использовать sync, обеспечивающий автоматическую загрузку измененных модулей.
 
+src/sample_template_handler
+
 
 ** поддержка сессий
 
+Поддержки сессий как таковой в cowboy нет. И даже нет удобного АПИ для работы
+с куками. Приходится работать на низком уровне, задавать заголовки для
+установки, чтения и снятия куки. Ну и самим реализовать хранение сессий где-то:
+в базе данных или каком-то кэше.
+
+Если хранить просто в памяти сервера (в ets, например), то тогда сессии не переживут
+рестарта сервера :) Поэтому берем memcache, redis, postgresql, riak, вашу любимую БД,
+и храним там.
+
+Ну и нужно как-то генерировать уникальные id сессий. Например так:
 #+BEGIN_SRC Erlang
+generate_session_id() ->
+    Str = integer_to_list(erlang:phash2({now(), make_ref()})),
+    <<Hash:128/integer>> = erlang:md5(Str),
+    list_to_binary(string:to_lower(integer_to_list(Hash, 16))).
 #+END_SRC
+
+Вот тут у меня есть библиотечка для таких дел:
+https://github.com/yzh44yzh/e_base_lib/blob/master/src/eb_rand.erl
+
+Установка куки:
+#+BEGIN_SRC Erlang
+SessionId = <<"6f0083b5fd77ca248e913589c55e7083">>,
+CookieProps = [{path, <<"/">>}, {max_age, 30 * 24 * 3600}], % 30 days
+Req2 = cowboy_req:set_resp_cookie(<<"sid">>, SessionId, CookieProps, Req),
+#+END_SRC
+
+Чтение куки:
+#+BEGIN_SRC Erlang
+{Sid, _} = cowboy_req:cookie(<<"sid">>, Req),
+case Sid of
+    undefined -> not_found;
+    _ -> Sid
+end
+#+END_SRC
+
+Удаление куки:
+#+BEGIN_SRC Erlang
+CookieProps = [{path, <<"/">>}, {max_age, 0}],
+Req2 = cowboy_req:set_resp_cookie(<<"sid">>, <<>>, CookieProps, Req),
+#+END_SRC
+
+src/sample_session_handler
 
 
 ** web socket хендлер (и bullet.js клиент)
