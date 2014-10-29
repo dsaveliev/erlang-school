@@ -1,4 +1,4 @@
--module(web_socket_handler).
+-module(sample_web_socket_handler).
 
 -export([init/4, stream/3, info/3, terminate/2]).
 

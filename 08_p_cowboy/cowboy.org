@@ -49,7 +49,7 @@ Routes = [Host1, Host2, ... HostN]
 #+BEGIN_SRC Erlang
 /user/:id/profile/ % /user/77/profile, /user/42/profile
 
-Id = cowboy_req:binding(id, Req) % <<"77">>, <<"42">>
+{Id, Req2} = cowboy_req:binding(id, Req) % <<"77">>, <<"42">>
 #+END_SRC
 
 Необязательные сегменты:
@@ -104,6 +104,28 @@ cowboy:set_env(my_http_listener, dispatch, Rounting2).
 ** http хендлер
 
 #+BEGIN_SRC Erlang
+{"/user/:user_id/profile/", sample_http_handler, []},
+{'_', not_found_handler, []}
+#+END_SRC
+
+src/not_found_handler
+
+src/sample_http_handler
+
+POST данные можно увидеть, отправив запрос с помощью curl
+#+BEGIN_SRC Erlang
+yura ~ $ curl "http://localhost:8080/user/88/profile" \
+> -d "user_name=Bill&age=33"
+
+<h1>Sample http handler</h1>
+<p>Host: localhost</p>
+<p>Path: /user/88/profile</p>
+<p>Url: http://localhost:8080/user/88/profile</p>
+<p>QueryString: </p>
+<p>Get Params: <ul></ul></p>
+<p>Post Params: <ul><li>user_name:Bill</li><li>age:33</li></ul></p>
+<p>User Id: 88</p>
+<p>User Name: guest</p>%
 #+END_SRC
 
 
