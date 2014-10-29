@@ -1,0 +1,11 @@
+% -*- mode: Erlang;-*-
+{application, try_cowboy,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {mod, {try_cowboy_app, []}},
+  {env, [
+	]}
+ ]}.

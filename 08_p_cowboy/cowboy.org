@@ -1,0 +1,43 @@
+* Веб-сервер cowboy
+
+Это не веб фреймворк, это веб сервер. Функциональность у него минималистичная.
+
+https://github.com/extend/cowboy
+
+http://ninenines.eu/docs/en/cowboy/HEAD/guide/
+
+
+** роутинг
+
+#+BEGIN_SRC Erlang
+#+END_SRC
+
+
+** статические файлы
+
+#+BEGIN_SRC Erlang
+#+END_SRC
+
+
+** http хендлер
+
+#+BEGIN_SRC Erlang
+#+END_SRC
+
+
+** web socket хендлер (и bullet.js клиент)
+
+#+BEGIN_SRC Erlang
+#+END_SRC
+
+
+** поддержка сессий
+
+#+BEGIN_SRC Erlang
+#+END_SRC
+
+
+** erlydtl шаблоны
+
+#+BEGIN_SRC Erlang
+#+END_SRC

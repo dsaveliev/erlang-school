@@ -81,9 +81,12 @@ xx_P -- практика
 
 
 ** 08_P Веб-сервер Cowboy (2 часа)
-   роутинг
+   Роутинг
+   Статические файлы
    http хендлер
-   web socket хендлер
+   web socket хендлер (и bullet.js клиент)
+   Поддержка сессий
+   erlydtl шаблоны
 
 
 ** 09_P Развертывание и запуск ноды (30 мин)
@@ -124,13 +127,3 @@ xx_P -- практика
 ** 16_P Релизы
 
 ** 17_P Common Test
-
-
-
-* TODO линки для черновиков
-http://yzh44yzh.by/post/ranch.html
-http://yzh44yzh.by/post/rebar.html
-http://yzh44yzh.by/post/dialyzer.html
-http://yzh44yzh.by/post/trace_dbg.html
-http://yzh44yzh.by/post/erlang_for_web_2.html
-http://yzh44yzh.by/post/distributed_erlang.html

@@ -1,7 +1,9 @@
 *.beam
 .eunit
 .rebarinfo
+.rebar
 deps
 logs
 ebin
 TAGS
+erl_crash.dump
