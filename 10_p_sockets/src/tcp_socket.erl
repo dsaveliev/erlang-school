@@ -1,4 +1,4 @@
--module(server).
+-module(tcp_socket).
 
 -export([start/1, listen/1, accept/1]).
 
@@ -28,4 +28,3 @@ handle() ->
             gen_tcp:send(Socket, Msg),
             handle()
     end.
-

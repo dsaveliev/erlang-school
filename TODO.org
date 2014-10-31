@@ -1,14 +1,11 @@
 * Подготовить темы:
 
-** 08_p_cowboy
-- web socket хендлер (и bullet.js клиент)
-  - подготовить код
-  - подготовить конспект
-
 ** 10_p_sockets
-   подготовить конспект
-   подготовить код
-   старый код есть, полезный. Пересмотреть его
+   - tcp
+     - конспект
+     - код
+   - ranch
+
 
 ** 11_p_key_value_storage
    подготовить конспект
@@ -36,7 +33,6 @@
 
 
 * линки для черновиков
-http://yzh44yzh.by/post/ranch.html
 http://yzh44yzh.by/post/rebar.html
 http://yzh44yzh.by/post/dialyzer.html
 http://yzh44yzh.by/post/trace_dbg.html
