@@ -16,12 +16,12 @@ start(_StartType, _StartArgs) ->
     Routing =
         [{'_',
           [
-           %% {"/api/chat/", bullet_handler, [{handler, chat_handler}]},
+           {"/", cowboy_static, {file, "priv/static/index.html", [{mimetypes, cow_mimetypes, all}]}},
+           {"/static/[...]", cowboy_static, {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
            {"/user/:user_id/profile/", sample_http_handler, []},
            {"/user/:name/messages", sample_template_handler, []},
            {"/session", sample_session_handler, []},
-           {"/", cowboy_static, {file, "priv/static/index.html", [{mimetypes, cow_mimetypes, all}]}},
-           {"/static/[...]", cowboy_static, {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
+           {"/api/chat/", bullet_handler, [{handler, sample_web_socket_handler}]},
            {'_', not_found_handler, []}
           ]}],
     Routing2 = cowboy_router:compile(Routing),

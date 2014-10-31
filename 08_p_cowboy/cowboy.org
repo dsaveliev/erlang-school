@@ -224,15 +224,78 @@ src/sample_session_handler
 
 ** web socket хендлер (и bullet.js клиент)
 
-версия буллет 0.4.1 работает с ковбоем 0.8.0
-а master работает с ковбоем 0.9.0
-то есть, буллет со свежим ковбоем использовать не получится
+https://github.com/extend/bullet
 
+Версия bullet 0.4.1 работает с ковбоем 0.8.0
+а bullet master работает с ковбоем 0.9.0
+то есть, со свежим ковбоем использовать не получится.
 
-chat.html
-js/bullet.js
-js/chat.js
-jquery нужно?
-
+Роутинг указываем так:
 #+BEGIN_SRC Erlang
+{"/api/chat/", bullet_handler, [{handler, sample_web_socket_handler}]},
 #+END_SRC
+
+Хендлер выглядит так:
+#+BEGIN_SRC Erlang
+-module(sample_web_socket_handler).
+
+-export([init/4, stream/3, info/3, terminate/2]).
+
+init(_Transport, Req, _Opts, _Active) ->
+    State = [],
+	{ok, Req, State}.
+
+
+stream(<<"match to some binary">>, Req, State) ->
+    Reply = "some iolist",
+	{reply, Reply, Req, State};
+
+stream(_Data, Req, State) ->
+	{ok, Req, State}.
+
+
+info({some_message}, Req, State) ->
+    Reply = "some iolist",
+	{reply, Reply, Req, State};
+
+info(_Info, Req, State) ->
+	{ok, Req, State}.
+
+
+terminate(_Req, _State) ->
+	ok.
+#+END_SRC
+
+На клиенте bullet.js предоставляет довольно простой АПИ:
+
+Открыть веб-сокет:
+#+BEGIN_SRC Erlang
+chat = $.bullet("ws://localhost:8080/api/chat", {});
+#+END_SRC
+
+Добавить обработчики событий:
+#+BEGIN_SRC Erlang
+chat.onopen = function(){
+    console.log("connected to server");
+};
+
+chat.onclose = chat.onDisconnect = function(){
+    console.log("disconnected from server");
+};
+
+chat.onmessage = function(event){
+    console.log("got json data from server", event.data);
+}
+#+END_SRC
+
+Посылать данные на сервер:
+#+BEGIN_SRC Erlang
+chat.send("my json data");
+#+END_SRC
+
+Ну и закрыть соединение:
+#+BEGIN_SRC Erlang
+chat.close();
+#+END_SRC
+
+Остается только реализовать свою логику :)
