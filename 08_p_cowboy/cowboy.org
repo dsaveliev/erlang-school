@@ -224,5 +224,15 @@ src/sample_session_handler
 
 ** web socket хендлер (и bullet.js клиент)
 
+версия буллет 0.4.1 работает с ковбоем 0.8.0
+а master работает с ковбоем 0.9.0
+то есть, буллет со свежим ковбоем использовать не получится
+
+
+chat.html
+js/bullet.js
+js/chat.js
+jquery нужно?
+
 #+BEGIN_SRC Erlang
 #+END_SRC

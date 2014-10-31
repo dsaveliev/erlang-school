@@ -21,7 +21,7 @@ start(_StartType, _StartArgs) ->
            {"/user/:name/messages", sample_template_handler, []},
            {"/session", sample_session_handler, []},
            {"/", cowboy_static, {file, "priv/static/index.html", [{mimetypes, cow_mimetypes, all}]}},
-           {"/[...]", cowboy_static, {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
+           {"/static/[...]", cowboy_static, {dir, "priv/static", [{mimetypes, cow_mimetypes, all}]}},
            {'_', not_found_handler, []}
           ]}],
     Routing2 = cowboy_router:compile(Routing),
