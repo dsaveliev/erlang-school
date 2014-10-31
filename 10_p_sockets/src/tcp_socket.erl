@@ -13,7 +13,7 @@ listen(Port) ->
     ok.
 
 accept(ListenSocket) ->
-    io:format("waiting for new client~n"),
+    io:format("~p waiting for new client~n", [self()]),
     {ok, _Socket} = gen_tcp:accept(ListenSocket),
     spawn(?MODULE, accept, [ListenSocket]),
     handle().
@@ -21,10 +21,10 @@ accept(ListenSocket) ->
 handle() ->
     receive
         {tcp, Socket, <<"quit", _/binary>>} ->
-            io:format("close client connection~n"),
+            io:format("~p close client connection~n", [self()]),
             gen_tcp:close(Socket);
         {tcp, Socket, Msg} ->
-            io:format("handle ~p~n", [Msg]),
+            io:format("~p handle ~p~n", [self(), Msg]),
             gen_tcp:send(Socket, Msg),
             handle()
     end.

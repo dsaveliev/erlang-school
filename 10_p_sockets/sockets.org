@@ -84,10 +84,63 @@ gen_tcp:recv(Socket, Length, Timeout) -> {ok, Packet} | {error, Reason}
 
 http://www.erlang.org/doc/man/gen_tcp.html
 
-наивная реализация
-src/tcp_socket.erl
+С TCP сокетом немного сложнее. Сперва нужно начать прослушивание порта:
+#+BEGIN_SRC Erlang
+gen_tcp:listen(Port, Options) -> {ok, ListenSocket} | {error, Reason}
+#+END_SRC
+
+Затем начать принимать на этом порту соединения для клиентов:
+#+BEGIN_SRC Erlang
+accept(ListenSocket) -> {ok, Socket} | {error, Reason}
+#+END_SRC
+
+Вызов accept блокируется, пока не появится клиент, желающий подключиться.
+И нам нужен отдельный поток на каждого клиента.
+
+Самое простое решение, после listen запускать новый поток для accept.
+И этот новый поток, получив соединение с клиентом, опять запускает
+новый поток, ожидающий следующего клиента. А сам уходит в цикл для
+обработки данных, приходящих от клиента:
+
+#+BEGIN_SRC Erlang
+listen(Port) ->
+    {ok, ListenSocket} = gen_tcp:listen(Port, [binary, {active, true}]),
+    spawn(?MODULE, accept, [ListenSocket]),
+    timer:sleep(infinity), % поток-владелец сокета не должен завершаться
+    ok.
+
+accept(ListenSocket) ->
+    {ok, _Socket} = gen_tcp:accept(ListenSocket),
+    spawn(?MODULE, accept, [ListenSocket]),
+    handle().
+
+handle() ->
+    receive
+        {tcp, Socket, Msg} ->
+            io:format("handle ~p~n", [Msg]),
+            gen_tcp:send(Socket, Msg),
+            handle()
+    end.
+#+END_SRC
+
+Ну или в пассивном режиме нужно самому читать данные из сокета:
+#+BEGIN_SRC Erlang
+recv(Socket, Length, Timeout) -> {ok, Packet} | {error, Reason}
+#+END_SRC
+
+Попробуем подключиться telnet клиентом и потестить.
 
 
 ** Ranch Acceptor Pool
 
+Эта реализация работает, но не очень эффективно. Гораздо эффективнее заранее создать пул
+из пары сотен процессов, которые будут висеть в gen_tcp:accept и ждать клиентских соединений.
+Тогда установка соединений будет быстрее.
+
+Это реализовано в Ranch Acceptor Pool
+
 http://yzh44yzh.by/post/ranch.html
+
+Надежный базис для построения своего TCP сервера. Поверх него построен cowboy :)
+
+И я использовал в своих проектах.
