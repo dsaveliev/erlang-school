@@ -1,0 +1,10 @@
+%% -*- mode: Erlang;-*-
+{application, ctidb,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {mod, {ctidb_app, []}},
+  {env, []}
+ ]}.
