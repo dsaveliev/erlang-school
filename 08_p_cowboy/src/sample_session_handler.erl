@@ -9,12 +9,12 @@ init({tcp, http}, Req, Opts) ->
 
 
 handle(Req, State) ->
-    {Sid, _} = cowboy_req:cookie(<<"sid">>, Req),
+    {Sid, _} = cowboy_req:cookie(<<"ssid">>, Req),
     {Body, Req3} = case Sid of
                        undefined ->
                            SessionId = generate_session_id(),
                            CookieProps = [{path, <<"/">>}, {max_age, 30 * 24 * 3600}], % 30 days
-                           Req2 = cowboy_req:set_resp_cookie("sid", SessionId, CookieProps, Req),
+                           Req2 = cowboy_req:set_resp_cookie("ssid", SessionId, CookieProps, Req),
                            {"session not found", Req2};
                        _ -> {["your session id is ", Sid], Req}
                    end,

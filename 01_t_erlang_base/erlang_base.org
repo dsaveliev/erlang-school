@@ -289,7 +289,7 @@ end.
 #+BEGIN_SRC Erlang
 %% check table owner leave table in waiting state
 check_room_owner(RoomId, OwnerId) ->
-    case personal_table:get_table_for_room(RoomId) of
+    case  personal_table:get_table_for_room(RoomId) of
         {ok, #ptable{id = TableId, owner = OwnerId}} ->
             bingo_room_manager:close_table_and_room(TableId, RoomId);
         _ -> do_nothing
@@ -327,7 +327,7 @@ andalso, orelse - вычисляют минимум аргументов
 comma is and, semicolon is or
 
 
-** KV-структуры данных: proplist, io_list, dict, ets
+** KV-структуры данных: proplist, dict, ets
 
 *** proplists
 
@@ -388,7 +388,7 @@ error
 13> dict:fetch(2, D5).
 ["Bill"]
 14> dict:fetch(1, D5).
-** exception error: bad argument
+    exception error: bad argument
 #+END_SRC
 
 orddict хранит ключи в сортированом виде, поэтому быстрый поиск по
@@ -573,8 +573,8 @@ pythag(N) ->
 500
 21> I2.
 600
-
 #+END_SRC
+
 
 ** String, unicode
 

@@ -58,8 +58,8 @@ xx_P -- практика
    lager
 
    Мониторинг
-   appmon, pman, tv, webtool
-   observer
+   observer, webtool,
+   tracing
 
    Статический анализатор
    dialyzer
@@ -67,7 +67,7 @@ xx_P -- практика
 
 ** 06_T Библиотеки (1 час)
    lager
-   cowboy
+   cowboy (и веб фреймворки)
    Сериализация данных: JSON (jsonx), bert, google protocol buffers
    poolboy
    epgsql, emysql
