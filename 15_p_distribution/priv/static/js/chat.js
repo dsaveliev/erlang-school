@@ -1,6 +1,6 @@
 var chatUrl = "ws://" + document.URL.split("/")[2] + "/api/chat";
 var chat = null;
-var history = [];
+var chatHistory = [];
 var users = [];
 
 function connect() {
@@ -38,19 +38,19 @@ function connect() {
             users = online.split("|");
             renderUsers();
 
-            history = [];
+            chatHistory = [];
             var messages = tokens[3].split("|");
             for(var i in messages) {
                 var parts = messages[i].split(":");
                 if(parts.length == 2)
-                    history.push("<p><b>" + parts[0] + ":</b> " + parts[1] + "</p>");
+                    chatHistory.push("<p><b>" + parts[0] + ":</b> " + parts[1] + "</p>");
             }
             renderHistory();
             break;
         case "msg":
             var user = tokens[1];
             var msg = tokens[2];
-            history.push("<p><b>" + user + ":</b> " + msg + "</p>");
+            chatHistory.push("<p><b>" + user + ":</b> " + msg + "</p>");
             renderHistory();
             break;
         case "user_join":
@@ -73,7 +73,7 @@ function connect() {
 
 function disconnect() {
 	chat.close();
-    history = [];
+    chatHistory = [];
     users = [];
     $("#chat_output").html("");
     $("#user_list").html("");
@@ -105,8 +105,8 @@ function userExists(user) {
 }
 
 function renderHistory() {
-    $("#chat_output").html(history.join("\n"));
-    $("#chat_output").scrollTop(history.length * 30);
+    $("#chat_output").html(chatHistory.join("\n"));
+    $("#chat_output").scrollTop(chatHistory.length * 30);
 }
 
 function renderUsers() {
